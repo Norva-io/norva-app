@@ -10,14 +10,7 @@ export default function LoginPage() {
             Connectez-vous à votre espace Customer Success
           </p>
         </div>
-        <SignIn 
-          appearance={{
-            elements: {
-              rootBox: "mx-auto",
-              card: "shadow-lg"
-            }
-          }}
-        />
+        <SignIn />
       </div>
     </div>
   )

@@ -10,14 +10,7 @@ export default function SignupPage() {
             Créez votre compte Customer Success
           </p>
         </div>
-        <SignUp 
-          appearance={{
-            elements: {
-              rootBox: "mx-auto",
-              card: "shadow-lg"
-            }
-          }}
-        />
+        <SignUp />
       </div>
     </div>
   )
