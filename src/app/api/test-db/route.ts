@@ -1,5 +1,10 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 /**
  * Test endpoint pour vérifier la connexion Supabase
@@ -13,7 +18,6 @@ import { NextResponse } from 'next/server'
  */
 export async function GET() {
   try {
-    const supabase = await createClient()
 
     // Test 1: Connexion basique
     const { count: usersCount, error: usersError } = await supabase
