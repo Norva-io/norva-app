@@ -1,9 +1,20 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Inter } from "next/font/google";
+import { frFR } from "@clerk/localizations";
+import { Inter, Newsreader } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  variable: "--font-newsreader",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Norva - Customer Success Platform",
@@ -16,8 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="fr">
+    <ClerkProvider localization={frFR}>
+      <html lang="fr" className={`${inter.variable} ${newsreader.variable}`}>
         <body className={inter.className}>{children}</body>
       </html>
     </ClerkProvider>
