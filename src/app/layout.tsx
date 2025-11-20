@@ -17,7 +17,7 @@ const newsreader = Newsreader({
 });
 
 export const metadata: Metadata = {
-  title: "Norva - Customer Success Platform",
+  title: "Norva | CS Copilot",
   description: "AI-powered customer success management for B2B teams",
 };
 
