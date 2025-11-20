@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { UserButton } from '@clerk/nextjs'
 import Image from 'next/image'
+import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -30,6 +31,23 @@ export default async function DashboardPage() {
     redirect('/error-sync')
   }
 
+  // Récupérer les statistiques
+  const { count: clientsCount } = await supabase
+    .from('clients')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+
+  const { data: clients } = await supabase
+    .from('clients')
+    .select('health_score')
+    .eq('user_id', user.id)
+    .not('health_score', 'is', null)
+
+  // Calculer la santé moyenne
+  const averageHealth = clients && clients.length > 0
+    ? Math.round(clients.reduce((sum, c) => sum + (c.health_score || 0), 0) / clients.length)
+    : null
+
   return (
     <div className="min-h-screen">
       <header className="border-b bg-card">
@@ -54,38 +72,40 @@ export default async function DashboardPage() {
 
         <div className="grid gap-4 md:grid-cols-3">
           {/* Card 1: Clients actifs */}
-          <Card className="relative overflow-hidden border-l-4 border-l-accent">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardDescription className="text-xs font-medium uppercase tracking-wide">
-                  Clients actifs
-                </CardDescription>
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-4 w-4 text-accent"
-                  >
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
+          <Link href="/clients">
+            <Card className="relative overflow-hidden border-l-4 border-l-accent transition-shadow hover:shadow-md">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardDescription className="text-xs font-medium uppercase tracking-wide">
+                    Clients actifs
+                  </CardDescription>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4 text-accent"
+                    >
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                  </div>
                 </div>
-              </div>
-              <CardTitle className="mt-2 font-serif text-3xl">0</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">
-                Aucun client détecté pour le moment
-              </p>
-            </CardContent>
-          </Card>
+                <CardTitle className="mt-2 font-serif text-3xl">{clientsCount || 0}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground">
+                  {!clientsCount || clientsCount === 0 ? 'Aucun client pour le moment' : `Client${clientsCount > 1 ? 's' : ''} enregistré${clientsCount > 1 ? 's' : ''}`}
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
 
           {/* Card 2: Emails analysés */}
           <Card className="relative overflow-hidden border-l-4 border-l-primary">
@@ -119,7 +139,7 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Card 3: Taux de satisfaction */}
+          {/* Card 3: Santé moyenne */}
           <Card className="relative overflow-hidden border-l-4 border-l-muted-foreground">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -141,11 +161,13 @@ export default async function DashboardPage() {
                   </svg>
                 </div>
               </div>
-              <CardTitle className="mt-2 font-serif text-3xl">--</CardTitle>
+              <CardTitle className="mt-2 font-serif text-3xl">
+                {averageHealth !== null ? averageHealth : '--'}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-xs text-muted-foreground">
-                Moyenne de tous vos clients
+                {averageHealth !== null ? 'Moyenne de tous vos clients' : 'Aucun client analysé'}
               </p>
             </CardContent>
           </Card>
