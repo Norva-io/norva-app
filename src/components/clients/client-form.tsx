@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -15,8 +15,8 @@ export function ClientForm({ action }: ClientFormProps) {
   const [domain, setDomain] = useState('')
   const [autoFilled, setAutoFilled] = useState(false)
 
-  // Auto-complétion intelligente du domaine
-  useEffect(() => {
+  // Auto-complétion intelligente du domaine lors du focus
+  const handleDomainFocus = () => {
     if (companyName && !domain) {
       // Extraire le nom de la société (supprimer "Corp", "Inc", etc.)
       const cleanName = companyName
@@ -31,7 +31,7 @@ export function ClientForm({ action }: ClientFormProps) {
         setAutoFilled(true)
       }
     }
-  }, [companyName, domain])
+  }
 
   const handleDomainChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDomain(e.target.value)
@@ -69,6 +69,7 @@ export function ClientForm({ action }: ClientFormProps) {
           required
           value={domain}
           onChange={handleDomainChange}
+          onFocus={handleDomainFocus}
           className={autoFilled ? 'border-primary' : ''}
         />
         <p className="text-xs text-muted-foreground">
