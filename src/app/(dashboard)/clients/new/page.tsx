@@ -4,10 +4,9 @@ import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { ArrowLeft } from 'lucide-react'
 import { NavBar } from '@/components/layout/nav-bar'
+import { ClientForm } from '@/components/clients/client-form'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -105,62 +104,7 @@ export default async function NewClientPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={handleCreateClient} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">
-                  Nom du client <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="name"
-                  name="name"
-                  placeholder="Ex: ACME Corp"
-                  required
-                />
-                <p className="text-xs text-muted-foreground">
-                  Le nom de l'entreprise ou de l'organisation
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="domain">
-                  Domaine email <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="domain"
-                  name="domain"
-                  type="text"
-                  placeholder="Ex: acme.com"
-                  required
-                />
-                <p className="text-xs text-muted-foreground">
-                  Le domaine utilisé dans les emails (sans @)
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="primary_contact_email">
-                  Email du contact principal
-                </Label>
-                <Input
-                  id="primary_contact_email"
-                  name="primary_contact_email"
-                  type="email"
-                  placeholder="Ex: john@acme.com"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Optionnel : L'email principal de votre contact
-                </p>
-              </div>
-
-              <div className="flex gap-3">
-                <Button type="submit" className="flex-1">
-                  Créer le client
-                </Button>
-                <Button asChild type="button" variant="outline">
-                  <Link href="/clients">Annuler</Link>
-                </Button>
-              </div>
-            </form>
+            <ClientForm action={handleCreateClient} />
           </CardContent>
         </Card>
       </main>

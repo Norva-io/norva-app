@@ -2,10 +2,11 @@ import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { PlusCircle } from 'lucide-react'
 import { NavBar } from '@/components/layout/nav-bar'
+import { ClientCard } from '@/components/clients/client-card'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -91,51 +92,9 @@ export default async function ClientsPage() {
           </Card>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {clients.map((client) => {
-              const healthColor =
-                client.health_status === 'healthy' ? 'border-l-green-500' :
-                client.health_status === 'stable' ? 'border-l-yellow-500' :
-                'border-l-red-500'
-
-              return (
-                <Card key={client.id} className={`relative overflow-hidden border-l-4 ${healthColor}`}>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="font-serif text-xl">{client.name}</CardTitle>
-                    <CardDescription className="text-xs">
-                      {client.domain}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {client.primary_contact_email && (
-                      <div className="text-sm text-muted-foreground">
-                        <span className="font-medium">Contact:</span> {client.primary_contact_email}
-                      </div>
-                    )}
-
-                    {client.health_score !== null ? (
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">Santé</span>
-                        <span className="font-serif text-2xl font-bold">{client.health_score}</span>
-                      </div>
-                    ) : (
-                      <div className="text-sm text-muted-foreground">
-                        Pas encore analysé
-                      </div>
-                    )}
-
-                    <div className="text-xs text-muted-foreground">
-                      {client.total_emails_count || 0} email(s) analysé(s)
-                    </div>
-
-                    <Button asChild variant="outline" className="w-full">
-                      <Link href={`/clients/${client.id}`}>
-                        Voir détails
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              )
-            })}
+            {clients.map((client) => (
+              <ClientCard key={client.id} client={client} />
+            ))}
           </div>
         )}
       </main>
