@@ -3,9 +3,9 @@ import Nylas from 'nylas'
 // Configuration Nylas
 export const nylasConfig = {
   clientId: process.env.NYLAS_CLIENT_ID || '',
-  clientSecret: process.env.NYLAS_CLIENT_SECRET || '',
+  clientSecret: process.env.NYLAS_API_KEY || '', // V3: API Key used as client secret
   apiKey: process.env.NYLAS_API_KEY || '',
-  apiUri: process.env.NYLAS_API_URI || 'https://api.us.nylas.com',
+  apiUri: process.env.NYLAS_API_URI || 'https://api.eu.nylas.com',
   callbackUri: process.env.NYLAS_CALLBACK_URI || 'http://localhost:3000/api/auth/outlook/callback',
 }
 
