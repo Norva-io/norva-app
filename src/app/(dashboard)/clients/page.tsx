@@ -13,6 +13,41 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+async function handleDeleteClient(clientId: string) {
+  'use server'
+
+  const { userId } = await auth()
+
+  if (!userId) {
+    redirect('/login')
+  }
+
+  // Vérifier que l'utilisateur existe dans Supabase
+  const { data: user } = await supabase
+    .from('users')
+    .select('id')
+    .eq('clerk_id', userId)
+    .single()
+
+  if (!user) {
+    redirect('/error-sync')
+  }
+
+  // Supprimer le client (avec vérification que c'est bien son client)
+  const { error } = await supabase
+    .from('clients')
+    .delete()
+    .eq('id', clientId)
+    .eq('user_id', user.id)
+
+  if (error) {
+    console.error('Error deleting client:', error)
+  }
+
+  // Pas besoin de redirect, juste un revalidate
+  // Le router.refresh() côté client suffira
+}
+
 export default async function ClientsPage() {
   const { userId } = await auth()
 
@@ -93,7 +128,7 @@ export default async function ClientsPage() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {clients.map((client) => (
-              <ClientCard key={client.id} client={client} />
+              <ClientCard key={client.id} client={client} onDelete={handleDeleteClient} />
             ))}
           </div>
         )}

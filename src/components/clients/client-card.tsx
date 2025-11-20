@@ -12,12 +12,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { MoreVertical, Trash2 } from 'lucide-react'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 interface ClientCardProps {
   client: {
@@ -29,9 +23,10 @@ interface ClientCardProps {
     health_status: string | null
     total_emails_count: number | null
   }
+  onDelete: (clientId: string) => Promise<void>
 }
 
-export function ClientCard({ client }: ClientCardProps) {
+export function ClientCard({ client, onDelete }: ClientCardProps) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -51,18 +46,7 @@ export function ClientCard({ client }: ClientCardProps) {
     setIsDeleting(true)
 
     try {
-      const { error } = await supabase
-        .from('clients')
-        .delete()
-        .eq('id', client.id)
-
-      if (error) {
-        console.error('Error deleting client:', error)
-        alert('Erreur lors de la suppression du client')
-        setIsDeleting(false)
-        return
-      }
-
+      await onDelete(client.id)
       router.refresh()
     } catch (error) {
       console.error('Error:', error)
