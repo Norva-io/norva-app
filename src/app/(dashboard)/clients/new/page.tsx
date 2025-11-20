@@ -1,7 +1,5 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { UserButton } from '@clerk/nextjs'
-import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ArrowLeft } from 'lucide-react'
+import { NavBar } from '@/components/layout/nav-bar'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -82,17 +81,7 @@ export default async function NewClientPage() {
 
   return (
     <div className="min-h-screen">
-      <header className="border-b bg-card">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="flex items-center gap-3">
-              <Image src="/logo.svg" alt="Norva" width={32} height={32} className="h-8 w-8" />
-              <h1 className="font-serif text-2xl font-bold">Norva</h1>
-            </Link>
-          </div>
-          <UserButton afterSignOutUrl="/login" />
-        </div>
-      </header>
+      <NavBar />
 
       <main className="container mx-auto max-w-2xl p-8">
         <div className="mb-8">
