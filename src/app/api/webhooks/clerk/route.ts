@@ -51,7 +51,7 @@ export async function POST(req: Request) {
   const eventType = evt.type
 
   if (eventType === 'user.created' || eventType === 'user.updated') {
-    const { id, email_addresses, first_name, last_name } = evt.data
+    const { id, email_addresses, first_name, last_name, image_url } = evt.data
 
     // Get primary email
     const primaryEmail = email_addresses.find(
@@ -62,15 +62,14 @@ export async function POST(req: Request) {
       return new Response('Error: No primary email found', { status: 400 })
     }
 
-    // Combine first_name and last_name into full_name
-    const fullName = [first_name, last_name].filter(Boolean).join(' ') || null
-
     // Upsert user in Supabase
     const { error } = await supabase.from('users').upsert(
       {
         clerk_id: id,
         email: primaryEmail.email_address,
-        full_name: fullName,
+        first_name: first_name || null,
+        last_name: last_name || null,
+        avatar_url: image_url || null,
         updated_at: new Date().toISOString(),
       },
       {

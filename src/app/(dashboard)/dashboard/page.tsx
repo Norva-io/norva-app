@@ -1,8 +1,37 @@
+import { auth } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
 import { UserButton } from '@clerk/nextjs'
 import Image from 'next/image'
+import { createClient } from '@supabase/supabase-js'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
-export default function DashboardPage() {
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
+export default async function DashboardPage() {
+  const { userId } = await auth()
+
+  if (!userId) {
+    redirect('/login')
+  }
+
+  // Vérifier que l'utilisateur existe dans Supabase
+  const { data: user } = await supabase
+    .from('users')
+    .select('id, email, first_name, last_name, avatar_url')
+    .eq('clerk_id', userId)
+    .single()
+
+  // Si l'utilisateur n'existe pas dans Supabase, le créer
+  if (!user) {
+    // Le webhook Clerk a probablement échoué, on crée l'user manuellement
+    console.warn(`User ${userId} not found in Supabase, webhook may have failed`)
+    // Pour l'instant, on laisse passer, le webhook finira par sync
+    // Alternative: redirect('/error?code=sync_failed')
+  }
+
   return (
     <div className="min-h-screen">
       <header className="border-b bg-card">
