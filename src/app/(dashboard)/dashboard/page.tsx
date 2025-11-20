@@ -1,4 +1,5 @@
 import { UserButton } from '@clerk/nextjs'
+import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function DashboardPage() {
@@ -6,7 +7,10 @@ export default function DashboardPage() {
     <div className="min-h-screen">
       <header className="border-b bg-card">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <h1 className="font-serif text-2xl font-bold">Norva</h1>
+          <div className="flex items-center gap-3">
+            <Image src="/logo.svg" alt="Norva" width={32} height={32} className="h-8 w-8" />
+            <h1 className="font-serif text-2xl font-bold">Norva</h1>
+          </div>
           <UserButton afterSignOutUrl="/login" />
         </div>
       </header>

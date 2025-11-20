@@ -44,8 +44,8 @@
   --text-main: #1C1C1E;       /* Noir anthracite Apple */
   --text-muted: #6E6E73;      /* Gris moyen */
 
-  /* IDENTITÉ (BRAND) */
-  --primary: #354E5C;         /* Bleu Pétrole/Ardoise */
+  /* IDENTITÉ (BRAND) - Warm Earth */
+  --primary: #2C2C2E;         /* Charcoal (remplace bleu pétrole) */
   --accent: #D97757;          /* Terracotta */
 
   /* ANALYSE SÉMANTIQUE */
@@ -63,7 +63,7 @@
   --card-foreground: #1C1C1E;
   --popover: #FFFFFF;
   --popover-foreground: #1C1C1E;
-  --primary: #354E5C;
+  --primary: #2C2C2E;
   --primary-foreground: #FFFFFF;
   --muted: #F1F5F9;
   --muted-foreground: #6E6E73;
@@ -72,7 +72,7 @@
   --destructive: #C53030;
   --border: #E5E5E5;
   --input: #E5E5E5;
-  --ring: #354E5C;
+  --ring: #2C2C2E;
 }
 
 @layer base {

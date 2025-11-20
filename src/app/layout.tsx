@@ -19,6 +19,9 @@ const newsreader = Newsreader({
 export const metadata: Metadata = {
   title: "Norva | CS Copilot",
   description: "AI-powered customer success management for B2B teams",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export default function RootLayout({
