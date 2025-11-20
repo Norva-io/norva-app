@@ -24,12 +24,10 @@ export default async function DashboardPage() {
     .eq('clerk_id', userId)
     .single()
 
-  // Si l'utilisateur n'existe pas dans Supabase, le créer
+  // Si l'utilisateur n'existe pas dans Supabase, rediriger vers page d'erreur
   if (!user) {
-    // Le webhook Clerk a probablement échoué, on crée l'user manuellement
-    console.warn(`User ${userId} not found in Supabase, webhook may have failed`)
-    // Pour l'instant, on laisse passer, le webhook finira par sync
-    // Alternative: redirect('/error?code=sync_failed')
+    console.error(`User ${userId} not found in Supabase, webhook failed`)
+    redirect('/error-sync')
   }
 
   return (
