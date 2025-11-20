@@ -15,7 +15,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-async function createClient(formData: FormData) {
+async function handleCreateClient(formData: FormData) {
   'use server'
 
   const { userId } = await auth()
@@ -41,7 +41,8 @@ async function createClient(formData: FormData) {
 
   // Validation basique
   if (!name || !domain) {
-    return { error: 'Le nom et le domaine sont requis' }
+    console.error('Validation error: name and domain are required')
+    redirect('/clients/new')
   }
 
   // Insérer le client
@@ -55,7 +56,7 @@ async function createClient(formData: FormData) {
 
   if (error) {
     console.error('Error creating client:', error)
-    return { error: 'Erreur lors de la création du client' }
+    redirect('/clients/new')
   }
 
   redirect('/clients')
@@ -115,7 +116,7 @@ export default async function NewClientPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={createClient} className="space-y-6">
+            <form action={handleCreateClient} className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="name">
                   Nom du client <span className="text-destructive">*</span>
