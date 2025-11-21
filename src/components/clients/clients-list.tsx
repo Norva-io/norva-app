@@ -112,30 +112,30 @@ export function ClientsList({ initialClients }: ClientsListProps) {
       </div>
 
       {clients.length > 0 && (
-        <div className="mb-4 flex items-center gap-4">
+        <div className="mb-4 flex items-center gap-3 text-xs">
           <div className="flex items-center gap-2">
-            <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Trier par :</span>
+            <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-muted-foreground">Trier par :</span>
             <Select value={sortBy} onValueChange={(value: SortBy) => setSortBy(value)}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="h-8 w-[160px] text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="risk">Priorité (Risque)</SelectItem>
-                <SelectItem value="health">Score de santé</SelectItem>
-                <SelectItem value="name">Nom (A-Z)</SelectItem>
-                <SelectItem value="last_interaction">Dernière interaction</SelectItem>
+                <SelectItem value="risk" className="text-xs">Priorité (Risque)</SelectItem>
+                <SelectItem value="health" className="text-xs">Score de santé</SelectItem>
+                <SelectItem value="name" className="text-xs">Nom (A-Z)</SelectItem>
+                <SelectItem value="last_interaction" className="text-xs">Dernière interaction</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <Select value={sortOrder} onValueChange={(value: 'asc' | 'desc') => setSortOrder(value)}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="h-8 w-[120px] text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="asc">Croissant</SelectItem>
-              <SelectItem value="desc">Décroissant</SelectItem>
+              <SelectItem value="asc" className="text-xs">Croissant</SelectItem>
+              <SelectItem value="desc" className="text-xs">Décroissant</SelectItem>
             </SelectContent>
           </Select>
         </div>
