@@ -5,12 +5,13 @@ import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { NavBar } from '@/components/layout/nav-bar'
-import { EmailList } from '@/components/client/email-list'
-import { SyncEmailsButton } from '@/components/client/sync-emails-button'
 import { ClientActions } from '@/components/client/client-actions'
-import { ArrowLeft, Mail, TrendingUp, AlertCircle, Sparkles } from 'lucide-react'
+import { ClientHealthOverview } from '@/components/client/client-health-overview'
+import { EmailTimeline } from '@/components/client/email-timeline'
+import { ClientInsightsList } from '@/components/client/client-insights-list'
+import { ArrowLeft, Mail, AlertCircle, Sparkles } from 'lucide-react'
+import { getOrCreateSupabaseUser } from '@/lib/supabase-user'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,14 +28,13 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
   // Await params (Next.js 15+)
   const { id } = await params
 
-  // Vérifier que l'utilisateur existe dans Supabase
-  const { data: user } = await supabase
-    .from('users')
-    .select('id, email_connected_at')
-    .eq('clerk_id', userId)
-    .single()
-
-  if (!user) {
+  // Récupérer ou créer l'utilisateur dans Supabase
+  let user
+  try {
+    const result = await getOrCreateSupabaseUser(userId)
+    user = result.user
+  } catch (error) {
+    console.error('❌ Error getting/creating user:', error)
     redirect('/error-sync')
   }
 
@@ -56,7 +56,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
     .select('*')
     .eq('client_id', client.id)
     .order('priority', { ascending: false })
-    .limit(5)
+    .limit(10)
 
   // Récupérer les emails récents du client
   const { data: emails } = await supabase
@@ -64,32 +64,10 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
     .select('*')
     .eq('client_id', client.id)
     .order('received_at', { ascending: false })
-    .limit(10)
-
-  // Calculer la période des emails
-  let emailPeriod = null
-  if (emails && emails.length > 0) {
-    const dates = emails.map((e) => new Date(e.received_at))
-    const oldestDate = new Date(Math.min(...dates.map((d) => d.getTime())))
-    const newestDate = new Date(Math.max(...dates.map((d) => d.getTime())))
-    emailPeriod = { oldest: oldestDate, newest: newestDate }
-  }
+    .limit(20)
 
   const hasEmailConnected = !!user.email_connected_at
   const hasBeenAnalyzed = client.last_analyzed_at !== null
-
-  // Déterminer la couleur du badge de santé
-  const healthColor =
-    client.health_status === 'healthy' ? 'bg-green-500' :
-    client.health_status === 'stable' ? 'bg-yellow-500' :
-    client.health_status === 'at_risk' ? 'bg-red-500' :
-    'bg-gray-500'
-
-  const healthLabel =
-    client.health_status === 'healthy' ? 'Excellente santé' :
-    client.health_status === 'stable' ? 'Stable' :
-    client.health_status === 'at_risk' ? 'À risque' :
-    'Non analysé'
 
   return (
     <div className="min-h-screen">
@@ -106,102 +84,68 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
           </Button>
 
           {/* En-tête client */}
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="font-serif text-4xl font-bold">{client.name}</h1>
-              <p className="mt-2 text-muted-foreground">{client.domain}</p>
-              {client.primary_contact_email && (
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Contact: {client.primary_contact_email}
-                </p>
-              )}
-            </div>
-
-            {/* Score de santé */}
-            {client.health_score !== null && (
-              <div className="text-right">
-                <div className="font-serif text-5xl font-bold text-primary">
-                  {client.health_score}
-                </div>
-                <Badge className={`mt-2 ${healthColor} text-white`}>
-                  {healthLabel}
-                </Badge>
-              </div>
+          <div className="mb-6">
+            <h1 className="font-serif text-4xl font-bold">{client.name}</h1>
+            <p className="mt-2 text-muted-foreground">{client.domain}</p>
+            {client.primary_contact_email && (
+              <p className="mt-1 text-sm text-muted-foreground">
+                Contact: {client.primary_contact_email}
+              </p>
             )}
           </div>
         </div>
 
-        {/* Action principale */}
-        <div className="mb-6">
-          {!hasEmailConnected ? (
-            <Card className="border-dashed bg-muted/50">
-              <CardContent className="flex items-center justify-between p-6">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                    <Mail className="h-6 w-6 text-primary" />
+        {/* Action principale si pas de connexion email ou pas analysé */}
+        {(!hasEmailConnected || !hasBeenAnalyzed) && (
+          <div className="mb-6">
+            {!hasEmailConnected ? (
+              <Card className="border-dashed bg-muted/50">
+                <CardContent className="flex items-center justify-between p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                      <Mail className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Connectez votre email</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Pour analyser ce client, connectez d'abord votre boîte email
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-semibold">Connectez votre email</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Pour analyser ce client, connectez d'abord votre boîte email
-                    </p>
+                  <Button asChild>
+                    <Link href="/settings">Connecter mon email</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-primary bg-primary/5">
+                <CardContent className="flex items-center justify-between p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                      <Sparkles className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">Prêt à analyser</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Synchronisez vos emails pour obtenir des insights sur ce client
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <Button asChild>
-                  <Link href="/settings">Connecter mon email</Link>
-                </Button>
-              </CardContent>
-            </Card>
-          ) : !hasBeenAnalyzed ? (
-            <Card className="border-primary bg-primary/5">
-              <CardContent className="flex items-center justify-between p-6">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                    <Sparkles className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Prêt à analyser</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Lancez l'analyse IA pour obtenir des insights sur ce client
-                    </p>
-                  </div>
-                </div>
-                <Button>
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Analyser maintenant
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardContent className="flex items-center justify-between p-6">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/10">
-                    <TrendingUp className="h-6 w-6 text-green-500" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Dernière analyse</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(client.last_analyzed_at).toLocaleDateString('fr-FR', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                      })}
-                    </p>
-                  </div>
-                </div>
-                <Button variant="outline">
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Relancer l'analyse
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+                  <Button asChild>
+                    <Link href="/settings">
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Synchroniser
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
 
         {/* Grille de contenu */}
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Colonne principale */}
+          {/* Colonne principale (2/3) */}
           <div className="space-y-6 lg:col-span-2">
             {/* Insights */}
             <Card>
@@ -215,111 +159,37 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {!insights || insights.length === 0 ? (
-                  <div className="py-8 text-center text-muted-foreground">
-                    <AlertCircle className="mx-auto mb-3 h-12 w-12 opacity-20" />
-                    <p>Aucun insight disponible pour le moment</p>
-                    <p className="text-sm">
-                      {hasEmailConnected
-                        ? 'Lancez une analyse pour générer des insights'
-                        : 'Connectez votre email pour commencer'}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {insights.map((insight) => (
-                      <div
-                        key={insight.id}
-                        className={`rounded-lg border-l-4 p-4 ${
-                          insight.insight_type === 'warning'
-                            ? 'border-l-yellow-500 bg-yellow-50/50 dark:bg-yellow-950/20'
-                            : insight.insight_type === 'success'
-                            ? 'border-l-green-500 bg-green-50/50 dark:bg-green-950/20'
-                            : 'border-l-blue-500 bg-blue-50/50 dark:bg-blue-950/20'
-                        }`}
-                      >
-                        <p className="text-sm font-medium">{insight.insight_text}</p>
-                        {insight.category && (
-                          <Badge variant="secondary" className="mt-2 text-xs">
-                            {insight.category}
-                          </Badge>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <ClientInsightsList insights={insights || []} />
               </CardContent>
             </Card>
 
             {/* Emails récents */}
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Mail className="h-5 w-5" />
-                      Emails récents
-                    </CardTitle>
-                    <CardDescription>
-                      Les derniers échanges avec ce client (3 derniers jours)
-                    </CardDescription>
-                  </div>
-                  {hasEmailConnected && <SyncEmailsButton />}
-                </div>
+                <CardTitle className="flex items-center gap-2">
+                  <Mail className="h-5 w-5" />
+                  Timeline des emails
+                </CardTitle>
+                <CardDescription>
+                  Les 20 derniers échanges avec ce client
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <EmailList emails={emails || []} />
+                <EmailTimeline emails={emails || []} clientDomain={client.domain} />
               </CardContent>
             </Card>
           </div>
 
-          {/* Sidebar */}
+          {/* Sidebar (1/3) */}
           <div className="space-y-6">
-            {/* Statistiques */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Statistiques</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="text-sm text-muted-foreground">Emails analysés</div>
-                  <div className="mt-1 font-serif text-2xl font-bold">
-                    {client.total_emails_count || 0}
-                  </div>
-                </div>
-
-                {emailPeriod && (
-                  <div>
-                    <div className="text-sm text-muted-foreground">Période</div>
-                    <div className="mt-1 text-sm">
-                      {emailPeriod.oldest.toLocaleDateString('fr-FR', {
-                        day: 'numeric',
-                        month: 'short',
-                      })}
-                      {' → '}
-                      {emailPeriod.newest.toLocaleDateString('fr-FR', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {client.last_analyzed_at && (
-                  <div>
-                    <div className="text-sm text-muted-foreground">Dernière analyse</div>
-                    <div className="mt-1 text-sm">
-                      {new Date(client.last_analyzed_at).toLocaleDateString('fr-FR', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                      })}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            {/* Health Overview */}
+            <ClientHealthOverview
+              healthScore={client.health_score}
+              riskLevel={client.risk_level as 'urgent' | 'high' | 'normal' | null}
+              lastInteractionAt={client.last_interaction_at}
+              emailsAnalyzedCount={client.emails_analyzed_count || 0}
+              lastAnalyzedAt={client.last_analyzed_at}
+            />
 
             {/* Actions */}
             <Card>

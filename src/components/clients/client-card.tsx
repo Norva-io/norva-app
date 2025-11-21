@@ -11,7 +11,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreVertical, Trash2, Pencil } from 'lucide-react'
+import { HealthBadge } from '@/components/ui/health-badge'
+import { getHealthColor } from '@/lib/design-tokens'
+import { MoreVertical, Trash2, Pencil, Mail, Calendar } from 'lucide-react'
+import { formatDistanceToNow } from 'date-fns'
+import { fr } from 'date-fns/locale'
 
 interface ClientCardProps {
   client: {
@@ -20,8 +24,9 @@ interface ClientCardProps {
     domain: string
     primary_contact_email: string | null
     health_score: number | null
-    health_status: string | null
-    total_emails_count: number | null
+    risk_level: 'urgent' | 'high' | 'normal' | null
+    emails_analyzed_count: number | null
+    last_interaction_at: string | null
   }
   onDelete: (clientId: string) => Promise<void>
 }
@@ -29,23 +34,22 @@ interface ClientCardProps {
 export function ClientCard({ client, onDelete }: ClientCardProps) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
-
-  const healthColor =
-    client.health_status === 'healthy' ? 'border-l-green-500' :
-    client.health_status === 'stable' ? 'border-l-yellow-500' :
-    'border-l-red-500'
+  
+  // Déterminer la couleur de bordure basée sur le health score
+  const healthColor = getHealthColor(client.health_score)
+  const borderColorClass = healthColor.border.replace('border-', 'border-l-')
 
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    router.push(`/clients/${client.id}/edit`)
+    router.push('/clients/' + client.id + '/edit')
   }
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
 
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${client.name} ?`)) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ' + client.name + ' ?')) {
       return
     }
 
@@ -61,14 +65,24 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
     }
   }
 
+  // Format last interaction
+  const formatLastInteraction = () => {
+    if (!client.last_interaction_at) return 'Aucune interaction'
+
+    return formatDistanceToNow(new Date(client.last_interaction_at), {
+      addSuffix: true,
+      locale: fr,
+    })
+  }
+
   return (
-    <Link href={`/clients/${client.id}`} className="block">
-      <Card className={`relative overflow-hidden border-l-4 ${healthColor} transition-shadow hover:shadow-md ${isDeleting ? 'opacity-50' : ''}`}>
+    <Link href={'/clients/' + client.id} className="block">
+      <Card className={'relative overflow-hidden transition-shadow hover:shadow-md border-l-4 ' + borderColorClass + (isDeleting ? ' opacity-50' : '')}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <CardTitle className="font-serif text-xl">{client.name}</CardTitle>
-              <CardDescription className="text-xs">
+              <CardDescription className="text-xs mt-1">
                 {client.domain}
               </CardDescription>
             </div>
@@ -109,8 +123,8 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
 
           {client.health_score !== null ? (
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Santé</span>
-              <span className="font-serif text-2xl font-bold">{client.health_score}</span>
+              <span className="text-sm font-medium">Score de santé</span>
+              <HealthBadge score={client.health_score} size="md" />
             </div>
           ) : (
             <div className="text-sm text-muted-foreground">
@@ -118,8 +132,15 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
             </div>
           )}
 
-          <div className="text-xs text-muted-foreground">
-            {client.total_emails_count || 0} email(s) analysé(s)
+          <div className="flex items-center gap-4 text-xs text-muted-foreground border-t pt-3">
+            <div className="flex items-center gap-1">
+              <Mail className="h-3 w-3" />
+              <span>{client.emails_analyzed_count || 0} emails</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              <span>{formatLastInteraction()}</span>
+            </div>
           </div>
         </CardContent>
       </Card>

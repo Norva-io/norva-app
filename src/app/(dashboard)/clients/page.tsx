@@ -30,9 +30,9 @@ export default async function ClientsPage() {
   // Récupérer tous les clients de l'utilisateur
   const { data: clients } = await supabase
     .from('clients')
-    .select('id, name, domain, primary_contact_email, health_score, health_status, total_emails_count, last_analyzed_at, created_at')
+    .select('id, name, domain, primary_contact_email, health_score, risk_level, emails_analyzed_count, last_interaction_at, last_analyzed_at, created_at')
     .eq('user_id', user.id)
-    .order('name', { ascending: true })
+    .order('created_at', { ascending: false })
 
   return (
     <div className="min-h-screen">

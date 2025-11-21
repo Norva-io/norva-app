@@ -20,9 +20,8 @@ interface Client {
   domain: string
   primary_contact_email: string | null
   health_score: number | null
-  risk_level: 'urgent' | 'high' | 'normal' | null
-  emails_analyzed_count: number | null
-  last_interaction_at: string | null
+  health_status: string | null
+  total_emails_count: number
   last_analyzed_at: string | null
   created_at: string
 }
@@ -31,46 +30,20 @@ interface ClientsListProps {
   initialClients: Client[]
 }
 
-type SortBy = 'name' | 'risk' | 'health' | 'last_interaction'
-
 export function ClientsList({ initialClients }: ClientsListProps) {
   const [clients, setClients] = useState<Client[]>(initialClients)
-  const [sortBy, setSortBy] = useState<SortBy>('risk')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
   useEffect(() => {
     const sorted = [...initialClients].sort((a, b) => {
-      let comparison = 0
-
-      switch (sortBy) {
-        case 'name':
-          comparison = a.name.localeCompare(b.name, 'fr')
-          break
-        case 'risk':
-          // Tri par risk_level: urgent > high > normal
-          const riskOrder = { urgent: 0, high: 1, normal: 2, null: 3 }
-          const aRisk = riskOrder[a.risk_level || 'null']
-          const bRisk = riskOrder[b.risk_level || 'null']
-          comparison = aRisk - bRisk
-          break
-        case 'health':
-          // Tri par health_score (les scores nuls en dernier)
-          const aScore = a.health_score ?? -1
-          const bScore = b.health_score ?? -1
-          comparison = aScore - bScore
-          break
-        case 'last_interaction':
-          // Tri par dernière interaction (les plus récents en premier par défaut)
-          const aTime = a.last_interaction_at ? new Date(a.last_interaction_at).getTime() : 0
-          const bTime = b.last_interaction_at ? new Date(b.last_interaction_at).getTime() : 0
-          comparison = bTime - aTime // Inverser pour avoir les plus récents en premier
-          break
+      if (sortOrder === 'asc') {
+        return a.name.localeCompare(b.name, 'fr')
+      } else {
+        return b.name.localeCompare(a.name, 'fr')
       }
-
-      return sortOrder === 'asc' ? comparison : -comparison
     })
     setClients(sorted)
-  }, [sortBy, sortOrder, initialClients])
+  }, [sortOrder, initialClients])
 
   const handleDelete = async (clientId: string) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) {
@@ -112,30 +85,16 @@ export function ClientsList({ initialClients }: ClientsListProps) {
       </div>
 
       {clients.length > 0 && (
-        <div className="mb-4 flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">Trier par :</span>
-            <Select value={sortBy} onValueChange={(value: SortBy) => setSortBy(value)}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="risk">Priorité (Risque)</SelectItem>
-                <SelectItem value="health">Score de santé</SelectItem>
-                <SelectItem value="name">Nom (A-Z)</SelectItem>
-                <SelectItem value="last_interaction">Dernière interaction</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
+        <div className="mb-4 flex items-center gap-2">
+          <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">Trier par nom :</span>
           <Select value={sortOrder} onValueChange={(value: 'asc' | 'desc') => setSortOrder(value)}>
             <SelectTrigger className="w-[140px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="asc">Croissant</SelectItem>
-              <SelectItem value="desc">Décroissant</SelectItem>
+              <SelectItem value="asc">A → Z</SelectItem>
+              <SelectItem value="desc">Z → A</SelectItem>
             </SelectContent>
           </Select>
         </div>
