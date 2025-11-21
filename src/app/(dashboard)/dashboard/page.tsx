@@ -187,7 +187,7 @@ export default async function DashboardPage() {
         {/* Row 2: Quick Stats groupées par 2 */}
         <div className="grid gap-4 md:grid-cols-2">
           {/* Groupe 1: Clients actifs + Clients à risque */}
-          <div className="grid gap-4 grid-cols-2">
+          <div className="grid grid-cols-2 gap-4">
             {/* Stat 1: Clients actifs */}
             <Link href="/clients">
               <Card className="transition-all hover:shadow-lg hover:scale-[1.02] cursor-pointer">
@@ -225,7 +225,7 @@ export default async function DashboardPage() {
           </div>
 
           {/* Groupe 2: Emails analysés + Non répondus */}
-          <div className="grid gap-4 grid-cols-2">
+          <div className="grid grid-cols-2 gap-4">
             {/* Stat 2: Emails analysés (48h) */}
             <Card>
               <CardHeader className="pb-2">
