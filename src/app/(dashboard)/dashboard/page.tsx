@@ -184,78 +184,72 @@ export default async function DashboardPage() {
           />
         </div>
 
-        {/* Row 2: Quick Stats - 2 groupes de 2 cartes */}
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Groupe 1: Clients actifs + Clients à risque */}
-          <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
-            {/* Stat 1: Clients actifs */}
-            <Link href="/clients">
-              <Card className="transition-all hover:shadow-lg hover:scale-[1.02] cursor-pointer">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardDescription className="text-sm font-medium uppercase tracking-wide">
-                      Clients actifs
-                    </CardDescription>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground/50" />
-                  </div>
-                  <CardTitle className="font-serif text-2xl">{clientsCount}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-xs text-muted-foreground">
-                    {clientsCount > 1 ? 'Clients' : 'Client'} enregistré{clientsCount > 1 ? 's' : ''}
-                  </p>
-                </CardContent>
-              </Card>
-            </Link>
-
-            {/* Stat 4: Clients à risque */}
-            <Card className={atRiskClients.length > 0 ? 'border-l-4 border-l-red-500' : ''}>
+        {/* Row 2: Quick Stats - 4 cartes en ligne avec groupement visuel */}
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-4">
+          {/* Stat 1: Clients actifs */}
+          <Link href="/clients">
+            <Card className="transition-all hover:shadow-lg hover:scale-[1.02] cursor-pointer">
               <CardHeader className="pb-2">
-                <CardDescription className="text-sm font-medium uppercase tracking-wide">
-                  Clients à risque
-                </CardDescription>
-                <CardTitle className="font-serif text-2xl">{atRiskClients.length}</CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardDescription className="text-sm font-medium uppercase tracking-wide">
+                    Clients actifs
+                  </CardDescription>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground/50" />
+                </div>
+                <CardTitle className="font-serif text-2xl">{clientsCount}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-xs text-muted-foreground">
-                  Nécessitent attention
+                  {clientsCount > 1 ? 'Clients' : 'Client'} enregistré{clientsCount > 1 ? 's' : ''}
                 </p>
               </CardContent>
             </Card>
-          </div>
+          </Link>
 
-          {/* Groupe 2: Emails analysés + Non répondus */}
-          <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
-            {/* Stat 2: Emails analysés (48h) */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardDescription className="text-sm font-medium uppercase tracking-wide">
-                  Emails analysés
-                </CardDescription>
-                <CardTitle className="font-serif text-2xl">{recentEmailsCount || 0}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-muted-foreground">
-                  Dernières 48 heures
-                </p>
-              </CardContent>
-            </Card>
+          {/* Stat 2: Clients à risque */}
+          <Card className={atRiskClients.length > 0 ? 'border-l-4 border-l-red-500' : ''}>
+            <CardHeader className="pb-2">
+              <CardDescription className="text-sm font-medium uppercase tracking-wide">
+                Clients à risque
+              </CardDescription>
+              <CardTitle className="font-serif text-2xl">{atRiskClients.length}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs text-muted-foreground">
+                Nécessitent attention
+              </p>
+            </CardContent>
+          </Card>
 
-            {/* Stat 3: Non répondus >48h */}
-            <Card className={unansweredEmailsCount && unansweredEmailsCount > 0 ? 'border-l-4 border-l-yellow-500' : ''}>
-              <CardHeader className="pb-2">
-                <CardDescription className="text-sm font-medium uppercase tracking-wide">
-                  Non répondus
-                </CardDescription>
-                <CardTitle className="font-serif text-2xl">{unansweredEmailsCount || 0}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-muted-foreground">
-                  Questions sans réponse
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Stat 3: Emails analysés (48h) */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription className="text-sm font-medium uppercase tracking-wide">
+                Emails analysés
+              </CardDescription>
+              <CardTitle className="font-serif text-2xl">{recentEmailsCount || 0}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs text-muted-foreground">
+                Dernières 48 heures
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Stat 4: Non répondus >48h */}
+          <Card className={unansweredEmailsCount && unansweredEmailsCount > 0 ? 'border-l-4 border-l-yellow-500' : ''}>
+            <CardHeader className="pb-2">
+              <CardDescription className="text-sm font-medium uppercase tracking-wide">
+                Non répondus
+              </CardDescription>
+              <CardTitle className="font-serif text-2xl">{unansweredEmailsCount || 0}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs text-muted-foreground">
+                Questions sans réponse
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>
