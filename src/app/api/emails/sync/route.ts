@@ -115,15 +115,25 @@ export async function POST(request: NextRequest) {
       if (!clientId && message.snippet) {
         const parsed = parseForwardedEmail(message.snippet)
 
+        // Log pour debug des forwards
+        if (parsed.isForwarded) {
+          console.log(`[Sync] Forward detected in email ${message.id} "${message.subject}"`)
+          console.log(`[Sync]   - Original from: ${parsed.originalFrom || 'not found'}`)
+          console.log(`[Sync]   - All emails found: ${parsed.allEmails.join(', ')}`)
+        }
+
         if (parsed.isForwarded) {
           // Chercher dans tous les emails extraits du body
           const bodyMatches = findMatchingClients(parsed.allEmails, clientDomainMap)
           if (bodyMatches.length > 0) {
             clientId = bodyMatches[0].clientId
+            console.log(`[Sync]   - MATCHED via forward: client ${clientId}`)
             // Si on a trouvé l'expéditeur original, l'utiliser
             if (parsed.originalFrom) {
               fromEmail = parsed.originalFrom
             }
+          } else {
+            console.log(`[Sync]   - No client match for forwarded emails`)
           }
         }
       }
@@ -171,7 +181,7 @@ export async function POST(request: NextRequest) {
       if (!insertError) {
         emailsSynced++
       } else {
-        console.error(`[Sync] Failed to insert email ${message.id}:`, insertError)
+        console.error(`[Sync] Failed to insert email ${message.id}:`, JSON.stringify(insertError, null, 2))
       }
     }
 
