@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * Suggested Actions Component
  * Displays AI-suggested actions as a to-do list for the client
