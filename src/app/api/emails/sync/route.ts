@@ -61,6 +61,9 @@ export async function POST(request: NextRequest) {
     const threeDaysAgo = Math.floor(Date.now() / 1000) - 3 * 24 * 60 * 60
 
     // Récupérer les emails depuis Nylas
+    console.log(`[Sync] Fetching emails for grant_id: ${user.email_grant_id}`)
+    console.log(`[Sync] Filters: limit=100, receivedAfter=${new Date(threeDaysAgo * 1000).toISOString()}`)
+
     const messages = await nylas.messages.list({
       identifier: user.email_grant_id,
       queryParams: {
@@ -69,8 +72,14 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    console.log(`[Sync] Nylas returned ${messages.data.length} messages`)
+
     let emailsSynced = 0
+    let emailsSkipped = 0
+    let emailsNoMatch = 0
     const clientDomainMap = new Map(clients.map((c) => [c.domain.toLowerCase(), c.id]))
+
+    console.log(`[Sync] Client domains to match: ${Array.from(clientDomainMap.keys()).join(', ')}`)
 
     // Traiter chaque email
     for (const message of messages.data) {
@@ -121,7 +130,10 @@ export async function POST(request: NextRequest) {
 
       // Stocker l'email même s'il n'est pas associé à un client (pour review manuel)
       // On skip seulement si fromEmail est invalide
-      if (!fromEmail) continue
+      if (!fromEmail) {
+        console.log(`[Sync] Skipping message ${message.id} - no fromEmail`)
+        continue
+      }
 
       // Vérifier si l'email existe déjà
       const { data: existing } = await supabase
@@ -130,7 +142,18 @@ export async function POST(request: NextRequest) {
         .eq('external_id', message.id)
         .single()
 
-      if (existing) continue // Email déjà synchronisé
+      if (existing) {
+        console.log(`[Sync] Skipping message ${message.id} - already exists`)
+        emailsSkipped++
+        continue
+      }
+
+      if (!clientId) {
+        console.log(`[Sync] Email ${message.subject} from ${fromEmail} - NO CLIENT MATCH`)
+        emailsNoMatch++
+      } else {
+        console.log(`[Sync] Email ${message.subject} from ${fromEmail} - MATCHED client ${clientId}`)
+      }
 
       // Insérer l'email
       const { error: insertError } = await supabase.from('emails').insert({
@@ -147,8 +170,12 @@ export async function POST(request: NextRequest) {
 
       if (!insertError) {
         emailsSynced++
+      } else {
+        console.error(`[Sync] Failed to insert email ${message.id}:`, insertError)
       }
     }
+
+    console.log(`[Sync] Summary: ${emailsSynced} synced, ${emailsSkipped} skipped (duplicates), ${emailsNoMatch} no client match`)
 
     // Mettre à jour le compteur d'emails pour chaque client
     for (const client of clients) {
