@@ -39,8 +39,15 @@ export function ClientHealthOverview({
     return 'Il y a ' + Math.floor(diffDays / 30) + ' mois'
   }
 
+  // Déterminer la couleur de bordure gauche uniquement
+  const borderLeftClass =
+    healthScore === null ? 'border-l-yellow-500' :
+    healthScore >= 70 ? 'border-l-green-500' :
+    healthScore >= 40 ? 'border-l-blue-500' :
+    'border-l-yellow-500'
+
   return (
-    <Card className={'border-l-4 ' + healthColor.border}>
+    <Card className={'border-l-4 ' + borderLeftClass}>
       <CardHeader>
         <CardTitle>Vue d'ensemble santé</CardTitle>
       </CardHeader>
