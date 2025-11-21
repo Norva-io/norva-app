@@ -73,15 +73,45 @@ export async function POST(request: NextRequest) {
 
     // Traiter chaque email
     for (const message of messages.data) {
-      // Extraire le domaine de l'expéditeur
-      const fromEmail = message.from?.[0]?.email?.toLowerCase()
-      if (!fromEmail) continue
+      // Extraire tous les emails impliqués (from, to, cc, bcc)
+      const allEmails: string[] = []
 
-      const domain = fromEmail.split('@')[1]
-      const clientId = clientDomainMap.get(domain)
+      // From
+      if (message.from?.[0]?.email) {
+        allEmails.push(message.from[0].email.toLowerCase())
+      }
 
-      // Ne synchroniser que les emails des clients connus
-      if (!clientId) continue
+      // To
+      message.to?.forEach((recipient) => {
+        if (recipient.email) allEmails.push(recipient.email.toLowerCase())
+      })
+
+      // CC
+      message.cc?.forEach((recipient) => {
+        if (recipient.email) allEmails.push(recipient.email.toLowerCase())
+      })
+
+      // BCC
+      message.bcc?.forEach((recipient) => {
+        if (recipient.email) allEmails.push(recipient.email.toLowerCase())
+      })
+
+      // Vérifier si un des emails correspond à un client
+      let clientId: string | undefined
+      let fromEmail: string | undefined
+
+      for (const email of allEmails) {
+        const domain = email.split('@')[1]
+        const foundClientId = clientDomainMap.get(domain)
+        if (foundClientId) {
+          clientId = foundClientId
+          fromEmail = message.from?.[0]?.email?.toLowerCase()
+          break
+        }
+      }
+
+      // Ne synchroniser que les emails liés aux clients connus
+      if (!clientId || !fromEmail) continue
 
       // Vérifier si l'email existe déjà
       const { data: existing } = await supabase

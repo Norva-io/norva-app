@@ -51,24 +51,24 @@ export default async function SettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Outlook */}
-              <EmailProviderCard
-                provider="outlook"
-                name="Microsoft Outlook"
-                description="Connectez votre compte Outlook ou Microsoft 365"
-                isConnected={!!user.email_grant_id && user.email_provider === 'outlook'}
-                connectedAt={user.email_connected_at}
-                connectUrl="/api/auth/outlook"
-              />
-
-              {/* Gmail - Coming soon */}
+              {/* Gmail - Active */}
               <EmailProviderCard
                 provider="gmail"
                 name="Google Gmail"
-                description="Connectez votre compte Gmail (bientôt disponible)"
-                isConnected={false}
-                connectedAt={null}
-                connectUrl="#"
+                description="Connectez votre compte Gmail"
+                isConnected={!!user.email_grant_id && user.email_provider === 'gmail'}
+                connectedAt={user.email_connected_at}
+                connectUrl="/api/auth/gmail"
+              />
+
+              {/* Outlook - Coming soon */}
+              <EmailProviderCard
+                provider="outlook"
+                name="Microsoft Outlook"
+                description="Connectez votre compte Outlook ou Microsoft 365 (bientôt disponible)"
+                isConnected={!!user.email_grant_id && user.email_provider === 'outlook'}
+                connectedAt={user.email_connected_at}
+                connectUrl="/api/auth/outlook"
                 disabled
               />
             </CardContent>

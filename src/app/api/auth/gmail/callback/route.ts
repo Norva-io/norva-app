@@ -17,11 +17,11 @@ export async function GET(request: NextRequest) {
   // Handle OAuth errors
   if (error) {
     console.error('OAuth error:', error)
-    redirect('/onboarding?error=oauth_failed')
+    redirect('/settings?error=oauth_failed')
   }
 
   if (!code || !state) {
-    redirect('/onboarding?error=missing_params')
+    redirect('/settings?error=missing_params')
   }
 
   try {
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       clientId: nylasConfig.clientId,
       clientSecret: nylasConfig.clientSecret,
       code,
-      redirectUri: nylasConfig.outlookCallbackUri,
+      redirectUri: nylasConfig.gmailCallbackUri,
     })
 
     const { grantId, email } = response
@@ -43,21 +43,22 @@ export async function GET(request: NextRequest) {
       .from('users')
       .update({
         email_grant_id: grantId,
+        email_provider: 'gmail',
         email_connected_at: new Date().toISOString(),
       })
       .eq('clerk_id', userId)
 
     if (dbError) {
       console.error('Error storing grant_id:', dbError)
-      redirect('/onboarding?error=database_error')
+      redirect('/settings?error=database_error')
     }
 
-    console.log(`✅ Email connected for user ${userId}: ${email}`)
+    console.log(`✅ Gmail connected for user ${userId}: ${email}`)
 
-    // Redirect to dashboard
-    redirect('/dashboard?success=email_connected')
+    // Redirect to settings with success
+    redirect('/settings?success=email_connected')
   } catch (err) {
     console.error('Error exchanging code:', err)
-    redirect('/onboarding?error=exchange_failed')
+    redirect('/settings?error=exchange_failed')
   }
 }
