@@ -29,7 +29,7 @@ export function NavBar() {
   const pathname = usePathname()
 
   return (
-    <header className="border-b bg-card">
+    <header className="sticky top-0 z-50 border-b bg-card">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link href="/dashboard" className="flex items-center gap-3">

@@ -1,8 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { CheckCircle2, Mail } from 'lucide-react'
+import { CheckCircle2, Mail, Loader2 } from 'lucide-react'
 
 interface EmailProviderCardProps {
   provider: 'outlook' | 'gmail'
@@ -11,6 +13,7 @@ interface EmailProviderCardProps {
   isConnected: boolean
   connectedAt: string | null
   connectUrl: string
+  disconnectUrl?: string
   disabled?: boolean
 }
 
@@ -21,11 +24,45 @@ export function EmailProviderCard({
   isConnected,
   connectedAt,
   connectUrl,
+  disconnectUrl,
   disabled = false,
 }: EmailProviderCardProps) {
+  const router = useRouter()
+  const [isDisconnecting, setIsDisconnecting] = useState(false)
+
   const providerColors = {
     outlook: 'bg-blue-100 text-blue-700',
     gmail: 'bg-red-100 text-red-700',
+  }
+
+  const handleDisconnect = async () => {
+    if (!disconnectUrl) return
+
+    const confirmMessage = `Êtes-vous sûr de vouloir déconnecter ${name} ?\n\nCela supprimera l'accès à vos emails, mais les emails déjà synchronisés seront conservés.`
+
+    if (!confirm(confirmMessage)) {
+      return
+    }
+
+    setIsDisconnecting(true)
+
+    try {
+      const response = await fetch(disconnectUrl, {
+        method: 'POST',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to disconnect')
+      }
+
+      // Refresh the page to update the UI
+      router.refresh()
+    } catch (error) {
+      console.error('Error disconnecting:', error)
+      alert('Erreur lors de la déconnexion. Veuillez réessayer.')
+    } finally {
+      setIsDisconnecting(false)
+    }
   }
 
   return (
@@ -60,8 +97,20 @@ export function EmailProviderCard({
       {/* Actions */}
       <div>
         {isConnected ? (
-          <Button variant="outline" size="sm" disabled>
-            Connecté
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleDisconnect}
+            disabled={isDisconnecting || !disconnectUrl}
+          >
+            {isDisconnecting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Déconnexion...
+              </>
+            ) : (
+              'Déconnecter'
+            )}
           </Button>
         ) : (
           <Link href={connectUrl}>
