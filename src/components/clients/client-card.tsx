@@ -126,13 +126,13 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleEdit}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Modifier
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleReassign} disabled={isReassigning}>
                   <RefreshCw className={`mr-2 h-4 w-4 ${isReassigning ? 'animate-spin' : ''}`} />
                   Analyser
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleEdit}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Modifier
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-destructive focus:text-destructive"

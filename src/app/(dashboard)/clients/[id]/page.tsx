@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { NavBar } from '@/components/layout/nav-bar'
 import { ClientActions } from '@/components/client/client-actions'
 import { ClientHealthOverview } from '@/components/client/client-health-overview'
-import { EmailTimeline } from '@/components/client/email-timeline'
+import { EmailTimelineWithResync } from '@/components/client/email-timeline-with-resync'
 import { ClientInsightsList } from '@/components/client/client-insights-list'
 import { ArrowLeft, Mail, AlertCircle, Sparkles } from 'lucide-react'
 import { getOrCreateSupabaseUser } from '@/lib/supabase-user'
@@ -175,7 +175,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <EmailTimeline emails={emails || []} clientDomain={client.domain} clientName={client.name} />
+                <EmailTimelineWithResync emails={emails || []} clientDomain={client.domain} clientName={client.name} />
               </CardContent>
             </Card>
           </div>
