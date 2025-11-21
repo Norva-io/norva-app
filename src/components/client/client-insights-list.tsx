@@ -57,7 +57,7 @@ export function ClientInsightsList({ insights, onDismiss }: ClientInsightsListPr
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {insights.map((insight) => {
         const priorityConfig = insight.priority_level
           ? getPriorityConfig(insight.priority_level)
@@ -66,42 +66,42 @@ export function ClientInsightsList({ insights, onDismiss }: ClientInsightsListPr
         return (
           <div
             key={insight.id}
-            className={`rounded-lg border-l-4 p-4 ${getInsightBorderColor(
+            className={`rounded-lg border-l-4 p-3 ${getInsightBorderColor(
               insight.insight_type,
               insight.priority_level || null
             )}`}
           >
             {/* Header */}
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-start gap-3">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-start gap-2">
                 {getInsightIcon(insight.insight_type, insight.priority_level || null)}
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     {priorityConfig && (
                       <span className="text-xs">{priorityConfig.icon}</span>
                     )}
-                    <p className="font-medium">{insight.insight_text}</p>
+                    <p className="text-sm font-medium">{insight.insight_text}</p>
                   </div>
 
                   {/* Category */}
                   {insight.category && (
-                    <Badge variant="secondary" className="mt-2 text-xs">
+                    <Badge variant="secondary" className="mt-1 text-xs">
                       {insight.category}
                     </Badge>
                   )}
 
                   {/* Suggested Action */}
                   {insight.suggested_action && (
-                    <div className="mt-3 rounded-md bg-background/80 p-3">
+                    <div className="mt-2 rounded-md bg-background/80 p-2">
                       <div className="text-xs font-medium text-muted-foreground">
                         Action suggérée:
                       </div>
-                      <div className="mt-1 text-sm">{insight.suggested_action}</div>
+                      <div className="mt-0.5 text-xs">{insight.suggested_action}</div>
                     </div>
                   )}
 
                   {/* Timestamp */}
-                  <div className="mt-2 text-xs text-muted-foreground">
+                  <div className="mt-1.5 text-xs text-muted-foreground">
                     Détecté{' '}
                     {new Date(insight.created_at).toLocaleDateString('fr-FR', {
                       day: 'numeric',
