@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { NavBar } from '@/components/layout/nav-bar'
 import { EmailList } from '@/components/client/email-list'
 import { SyncEmailsButton } from '@/components/client/sync-emails-button'
+import { ClientActions } from '@/components/client/client-actions'
 import { ArrowLeft, Mail, TrendingUp, AlertCircle, Sparkles } from 'lucide-react'
 
 const supabase = createClient(
@@ -16,12 +17,15 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-export default async function ClientDetailPage({ params }: { params: { id: string } }) {
+export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { userId } = await auth()
 
   if (!userId) {
     redirect('/login')
   }
+
+  // Await params (Next.js 15+)
+  const { id } = await params
 
   // Vérifier que l'utilisateur existe dans Supabase
   const { data: user } = await supabase
@@ -38,7 +42,7 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
   const { data: client } = await supabase
     .from('clients')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('user_id', user.id)
     .single()
 
@@ -59,8 +63,17 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
     .from('emails')
     .select('*')
     .eq('client_id', client.id)
-    .order('sent_at', { ascending: false })
+    .order('received_at', { ascending: false })
     .limit(10)
+
+  // Calculer la période des emails
+  let emailPeriod = null
+  if (emails && emails.length > 0) {
+    const dates = emails.map((e) => new Date(e.received_at))
+    const oldestDate = new Date(Math.min(...dates.map((d) => d.getTime())))
+    const newestDate = new Date(Math.max(...dates.map((d) => d.getTime())))
+    emailPeriod = { oldest: oldestDate, newest: newestDate }
+  }
 
   const hasEmailConnected = !!user.email_connected_at
   const hasBeenAnalyzed = client.last_analyzed_at !== null
@@ -82,9 +95,9 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
     <div className="min-h-screen">
       <NavBar />
 
-      <main className="container mx-auto p-8">
+      <main className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
-        <div className="mb-8">
+        <div className="mb-6">
           <Button asChild variant="ghost" size="sm" className="mb-4">
             <Link href="/clients">
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -119,7 +132,7 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
         </div>
 
         {/* Action principale */}
-        <div className="mb-8">
+        <div className="mb-6">
           {!hasEmailConnected ? (
             <Card className="border-dashed bg-muted/50">
               <CardContent className="flex items-center justify-between p-6">
@@ -275,16 +288,23 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
                   </div>
                 </div>
 
-                <div>
-                  <div className="text-sm text-muted-foreground">Créé le</div>
-                  <div className="mt-1 text-sm">
-                    {new Date(client.created_at).toLocaleDateString('fr-FR', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                    })}
+                {emailPeriod && (
+                  <div>
+                    <div className="text-sm text-muted-foreground">Période</div>
+                    <div className="mt-1 text-sm">
+                      {emailPeriod.oldest.toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'short',
+                      })}
+                      {' → '}
+                      {emailPeriod.newest.toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {client.last_analyzed_at && (
                   <div>
@@ -306,13 +326,8 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
               <CardHeader>
                 <CardTitle className="text-base">Actions</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <Button variant="outline" className="w-full justify-start" disabled>
-                  Modifier les informations
-                </Button>
-                <Button variant="outline" className="w-full justify-start text-destructive" disabled>
-                  Supprimer le client
-                </Button>
+              <CardContent>
+                <ClientActions clientId={client.id} clientName={client.name} />
               </CardContent>
             </Card>
           </div>

@@ -1,18 +1,26 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
 
 interface ClientFormProps {
   action: (formData: FormData) => void
+  initialData?: {
+    name: string
+    domain: string
+    primary_contact_email: string
+  }
+  submitLabel?: string
 }
 
-export function ClientForm({ action }: ClientFormProps) {
-  const [companyName, setCompanyName] = useState('')
-  const [domain, setDomain] = useState('')
+export function ClientForm({ action, initialData, submitLabel = 'Créer le client' }: ClientFormProps) {
+  const router = useRouter()
+  const [companyName, setCompanyName] = useState(initialData?.name || '')
+  const [domain, setDomain] = useState(initialData?.domain || '')
+  const [primaryContactEmail, setPrimaryContactEmail] = useState(initialData?.primary_contact_email || '')
   const [autoFilled, setAutoFilled] = useState(false)
 
   // Auto-complétion intelligente du domaine lors du focus
@@ -30,6 +38,13 @@ export function ClientForm({ action }: ClientFormProps) {
         setDomain(`${cleanName}.com`)
         setAutoFilled(true)
       }
+    }
+  }
+
+  // Auto-complétion de l'email du contact avec @domaine
+  const handleEmailFocus = () => {
+    if (domain && !primaryContactEmail) {
+      setPrimaryContactEmail(`@${domain}`)
     }
   }
 
@@ -88,6 +103,9 @@ export function ClientForm({ action }: ClientFormProps) {
           name="primary_contact_email"
           type="email"
           placeholder="Ex: john@acme.com"
+          value={primaryContactEmail}
+          onChange={(e) => setPrimaryContactEmail(e.target.value)}
+          onFocus={handleEmailFocus}
         />
         <p className="text-xs text-muted-foreground">
           Optionnel : L'email principal de votre contact
@@ -96,10 +114,10 @@ export function ClientForm({ action }: ClientFormProps) {
 
       <div className="flex gap-3">
         <Button type="submit" className="flex-1">
-          Créer le client
+          {submitLabel}
         </Button>
-        <Button asChild type="button" variant="outline">
-          <Link href="/clients">Annuler</Link>
+        <Button type="button" variant="outline" onClick={() => router.back()}>
+          Annuler
         </Button>
       </div>
     </form>

@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreVertical, Trash2 } from 'lucide-react'
+import { MoreVertical, Trash2, Pencil } from 'lucide-react'
 
 interface ClientCardProps {
   client: {
@@ -34,6 +34,12 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
     client.health_status === 'healthy' ? 'border-l-green-500' :
     client.health_status === 'stable' ? 'border-l-yellow-500' :
     'border-l-red-500'
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    router.push(`/clients/${client.id}/edit`)
+  }
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -79,6 +85,10 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleEdit}>
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Modifier
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-destructive focus:text-destructive"
                   onClick={handleDelete}
