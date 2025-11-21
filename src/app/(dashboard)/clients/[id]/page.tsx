@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { NavBar } from '@/components/layout/nav-bar'
+import { EmailList } from '@/components/client/email-list'
+import { SyncEmailsButton } from '@/components/client/sync-emails-button'
 import { ArrowLeft, Mail, TrendingUp, AlertCircle, Sparkles } from 'lucide-react'
 
 const supabase = createClient(
@@ -51,6 +53,14 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
     .eq('client_id', client.id)
     .order('priority', { ascending: false })
     .limit(5)
+
+  // Récupérer les emails récents du client
+  const { data: emails } = await supabase
+    .from('emails')
+    .select('*')
+    .eq('client_id', client.id)
+    .order('sent_at', { ascending: false })
+    .limit(10)
 
   const hasEmailConnected = !!user.email_connected_at
   const hasBeenAnalyzed = client.last_analyzed_at !== null
@@ -228,25 +238,24 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
               </CardContent>
             </Card>
 
-            {/* Emails récents (placeholder) */}
+            {/* Emails récents */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Mail className="h-5 w-5" />
-                  Emails récents
-                </CardTitle>
-                <CardDescription>
-                  Les derniers échanges avec ce client
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Mail className="h-5 w-5" />
+                      Emails récents
+                    </CardTitle>
+                    <CardDescription>
+                      Les derniers échanges avec ce client (3 derniers jours)
+                    </CardDescription>
+                  </div>
+                  {hasEmailConnected && <SyncEmailsButton />}
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="py-8 text-center text-muted-foreground">
-                  <Mail className="mx-auto mb-3 h-12 w-12 opacity-20" />
-                  <p>Aucun email analysé pour le moment</p>
-                  <p className="text-sm">
-                    Les emails apparaîtront ici après l'analyse
-                  </p>
-                </div>
+                <EmailList emails={emails || []} />
               </CardContent>
             </Card>
           </div>
