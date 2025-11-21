@@ -159,7 +159,7 @@ export default async function DashboardPage() {
             Bonjour{user.first_name ? ` ${user.first_name}` : ''} 👋
           </h2>
           <p className="mt-1 text-muted-foreground">
-            Voici un aperçu de votre activité
+            Voici un aperçu de votre activité client
           </p>
         </div>
 
