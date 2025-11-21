@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { NavBar } from '@/components/layout/nav-bar'
+import { getOrCreateSupabaseUser } from '@/lib/supabase-user'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,16 +18,17 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 
-  // Vérifier que l'utilisateur existe dans Supabase
-  const { data: user } = await supabase
-    .from('users')
-    .select('id, email, first_name, last_name, avatar_url')
-    .eq('clerk_id', userId)
-    .single()
+  // Récupérer ou créer l'utilisateur dans Supabase
+  let user
+  try {
+    const result = await getOrCreateSupabaseUser(userId)
+    user = result.user
 
-  // Si l'utilisateur n'existe pas dans Supabase, rediriger vers page d'erreur
-  if (!user) {
-    console.error(`User ${userId} not found in Supabase, webhook failed`)
+    if (result.created) {
+      console.log('✅ Fallback: User created successfully in Supabase')
+    }
+  } catch (error) {
+    console.error('❌ Error getting/creating user:', error)
     redirect('/error-sync')
   }
 
@@ -99,13 +101,13 @@ export default async function DashboardPage() {
           </Link>
 
           {/* Card 2: Emails analysés */}
-          <Card className="relative overflow-hidden border-l-4 border-l-primary">
+          <Card className="relative overflow-hidden border-l-4 border-l-accent">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardDescription className="text-xs font-medium uppercase tracking-wide">
                   Emails analysés
                 </CardDescription>
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -114,7 +116,7 @@ export default async function DashboardPage() {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-4 w-4 text-primary"
+                    className="h-4 w-4 text-accent"
                   >
                     <rect width="20" height="16" x="2" y="4" rx="2" />
                     <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
@@ -131,13 +133,13 @@ export default async function DashboardPage() {
           </Card>
 
           {/* Card 3: Santé moyenne */}
-          <Card className="relative overflow-hidden border-l-4 border-l-muted-foreground">
+          <Card className="relative overflow-hidden border-l-4 border-l-accent">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardDescription className="text-xs font-medium uppercase tracking-wide">
                   Santé moyenne
                 </CardDescription>
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -146,7 +148,7 @@ export default async function DashboardPage() {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-4 w-4 text-muted-foreground"
+                    className="h-4 w-4 text-accent"
                   >
                     <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                   </svg>

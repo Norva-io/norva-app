@@ -5,6 +5,7 @@ import { NavBar } from '@/components/layout/nav-bar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { EmailProviderCard } from '@/components/settings/email-provider-card'
 import { SyncEmailsSection } from '@/components/settings/sync-emails-section'
+import { getOrCreateSupabaseUser } from '@/lib/supabase-user'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,14 +19,13 @@ export default async function SettingsPage() {
     redirect('/login')
   }
 
-  // Récupérer les infos utilisateur
-  const { data: user } = await supabase
-    .from('users')
-    .select('id, email, email_grant_id, email_connected_at, email_provider')
-    .eq('clerk_id', userId)
-    .single()
-
-  if (!user) {
+  // Récupérer ou créer l'utilisateur dans Supabase
+  let user
+  try {
+    const result = await getOrCreateSupabaseUser(userId)
+    user = result.user
+  } catch (error) {
+    console.error('Error getting/creating user:', error)
     redirect('/error-sync')
   }
 
@@ -40,7 +40,7 @@ export default async function SettingsPage() {
       <NavBar />
 
       <main className="container mx-auto px-4 py-8">
-        <div className="mx-auto max-w-4xl space-y-8">
+        <div className="mx-auto max-w-4xl space-y-6">
           {/* Header */}
           <div>
             <h1 className="font-serif text-3xl font-bold">Paramètres</h1>
@@ -48,6 +48,24 @@ export default async function SettingsPage() {
               Gérez vos préférences et connexions
             </p>
           </div>
+
+          {/* Section: Compte (en premier maintenant) */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Informations du compte</CardTitle>
+              <CardDescription>
+                Votre adresse email principale
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between rounded-lg border p-4">
+                <div>
+                  <p className="text-sm font-medium">Email</p>
+                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Section: Connexions Email */}
           <Card>
@@ -66,6 +84,7 @@ export default async function SettingsPage() {
                 isConnected={!!user.email_grant_id && user.email_provider === 'gmail'}
                 connectedAt={user.email_connected_at}
                 connectUrl="/api/auth/gmail"
+                disconnectUrl="/api/auth/gmail/disconnect"
               />
 
               {/* Outlook - Coming soon */}
@@ -86,24 +105,6 @@ export default async function SettingsPage() {
             hasEmailConnected={!!user.email_grant_id}
             clientsCount={clientsCount || 0}
           />
-
-          {/* Section: Compte (placeholder pour futures fonctionnalités) */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Informations du compte</CardTitle>
-              <CardDescription>
-                Votre adresse email principale
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between rounded-lg border p-4">
-                <div>
-                  <p className="text-sm font-medium">Email</p>
-                  <p className="text-sm text-muted-foreground">{user.email}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </main>
     </div>
