@@ -175,7 +175,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <EmailTimeline emails={emails || []} clientDomain={client.domain} />
+                <EmailTimeline emails={emails || []} clientDomain={client.domain} clientName={client.name} />
               </CardContent>
             </Card>
           </div>

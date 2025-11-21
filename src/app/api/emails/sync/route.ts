@@ -177,16 +177,33 @@ export async function POST(request: NextRequest) {
 
     console.log(`[Sync] Summary: ${emailsSynced} synced, ${emailsSkipped} skipped (duplicates), ${emailsNoMatch} no client match`)
 
-    // Mettre à jour le compteur d'emails pour chaque client
+    // Mettre à jour le compteur d'emails et last_interaction_at pour chaque client
     for (const client of clients) {
       const { count } = await supabase
         .from('emails')
         .select('*', { count: 'exact', head: true })
         .eq('client_id', client.id)
 
+      // Récupérer l'email le plus récent pour mettre à jour last_interaction_at
+      const { data: latestEmail } = await supabase
+        .from('emails')
+        .select('received_at')
+        .eq('client_id', client.id)
+        .order('received_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      const updateData: { total_emails_count: number; last_interaction_at?: string } = {
+        total_emails_count: count || 0,
+      }
+
+      if (latestEmail) {
+        updateData.last_interaction_at = latestEmail.received_at
+      }
+
       await supabase
         .from('clients')
-        .update({ total_emails_count: count || 0 })
+        .update(updateData)
         .eq('id', client.id)
     }
 
