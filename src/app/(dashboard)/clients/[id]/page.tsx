@@ -11,6 +11,7 @@ import { ClientHealthOverview } from '@/components/client/client-health-overview
 import { EmailTimeline } from '@/components/client/email-timeline'
 import { ResyncButton } from '@/components/client/email-timeline-with-resync'
 import { ClientInsightsList } from '@/components/client/client-insights-list'
+import { SuggestedActions } from '@/components/client/suggested-actions'
 import { ArrowLeft, Mail, AlertCircle, Sparkles } from 'lucide-react'
 import { getOrCreateSupabaseUser } from '@/lib/supabase-user'
 
@@ -199,6 +200,9 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
               emailsAnalyzedCount={client.emails_analyzed_count || 0}
               lastAnalyzedAt={client.last_analyzed_at}
             />
+
+            {/* Suggested Actions */}
+            <SuggestedActions actions={[]} />
           </div>
         </div>
       </main>
