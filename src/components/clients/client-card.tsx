@@ -77,7 +77,7 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
 
   return (
     <Link href={'/clients/' + client.id} className="block">
-      <Card className={'relative overflow-hidden transition-shadow hover:shadow-md border-l-4 ' + borderColorClass + (isDeleting ? ' opacity-50' : '')}>
+      <Card className={'relative overflow-hidden transition-all hover:shadow-lg hover:scale-[1.02] cursor-pointer border-l-4 ' + borderColorClass + (isDeleting ? ' opacity-50' : '')}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex-1">
