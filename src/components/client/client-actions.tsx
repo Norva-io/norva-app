@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Pencil, Trash2, Loader2 } from 'lucide-react'
+import { Pencil, Trash2, Loader2, RefreshCw } from 'lucide-react'
 
 interface ClientActionsProps {
   clientId: string
@@ -13,9 +13,34 @@ interface ClientActionsProps {
 export function ClientActions({ clientId, clientName }: ClientActionsProps) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isReassigning, setIsReassigning] = useState(false)
 
   const handleEdit = () => {
     router.push(`/clients/${clientId}/edit`)
+  }
+
+  const handleReassign = async () => {
+    setIsReassigning(true)
+
+    try {
+      const response = await fetch('/api/emails/reassign', {
+        method: 'POST',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to reassign emails')
+      }
+
+      alert(`${data.emailsReassigned} email(s) réattribué(s) avec succès`)
+      router.refresh()
+    } catch (error) {
+      console.error('Error reassigning emails:', error)
+      alert('Erreur lors de la réattribution des emails')
+    } finally {
+      setIsReassigning(false)
+    }
   }
 
   const handleDelete = async () => {
@@ -46,6 +71,24 @@ export function ClientActions({ clientId, clientName }: ClientActionsProps) {
 
   return (
     <div className="space-y-2">
+      <Button
+        onClick={handleReassign}
+        variant="outline"
+        className="w-full justify-start"
+        disabled={isReassigning}
+      >
+        {isReassigning ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Synchronisation...
+          </>
+        ) : (
+          <>
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Synchroniser les emails
+          </>
+        )}
+      </Button>
       <Button
         onClick={handleEdit}
         variant="outline"
