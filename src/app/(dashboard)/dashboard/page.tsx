@@ -184,8 +184,8 @@ export default async function DashboardPage() {
           />
         </div>
 
-        {/* Row 2: Quick Stats - 4 cartes en ligne avec groupement visuel */}
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-4">
+        {/* Row 2: Clients - 2 cartes */}
+        <div className="mb-6 grid gap-6 md:grid-cols-2">
           {/* Stat 1: Clients actifs */}
           <Link href="/clients">
             <Card className="transition-all hover:shadow-lg hover:scale-[1.02] cursor-pointer">
@@ -220,7 +220,10 @@ export default async function DashboardPage() {
               </p>
             </CardContent>
           </Card>
+        </div>
 
+        {/* Row 3: Emails - 2 cartes */}
+        <div className="grid gap-6 md:grid-cols-2">
           {/* Stat 3: Emails analysés (48h) */}
           <Card>
             <CardHeader className="pb-2">
