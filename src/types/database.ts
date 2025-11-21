@@ -99,7 +99,7 @@ export interface Database {
       emails: {
         Row: {
           id: string
-          client_id: string
+          client_id: string | null
           external_id: string
           subject: string | null
           from_email: string
@@ -114,7 +114,7 @@ export interface Database {
         }
         Insert: {
           id?: string
-          client_id: string
+          client_id?: string | null
           external_id: string
           subject?: string | null
           from_email: string
@@ -129,7 +129,7 @@ export interface Database {
         }
         Update: {
           id?: string
-          client_id?: string
+          client_id?: string | null
           external_id?: string
           subject?: string | null
           from_email?: string

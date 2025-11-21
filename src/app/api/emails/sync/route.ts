@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@supabase/supabase-js'
 import { nylas } from '@/lib/nylas'
+import { parseForwardedEmail, findMatchingClients } from '@/lib/email-parser'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -96,22 +97,31 @@ export async function POST(request: NextRequest) {
         if (recipient.email) allEmails.push(recipient.email.toLowerCase())
       })
 
-      // Vérifier si un des emails correspond à un client
-      let clientId: string | undefined
-      let fromEmail: string | undefined
+      // Chercher un match dans les headers
+      const headerMatches = findMatchingClients(allEmails, clientDomainMap)
+      let clientId: string | undefined = headerMatches[0]?.clientId
+      let fromEmail = message.from?.[0]?.email?.toLowerCase()
 
-      for (const email of allEmails) {
-        const domain = email.split('@')[1]
-        const foundClientId = clientDomainMap.get(domain)
-        if (foundClientId) {
-          clientId = foundClientId
-          fromEmail = message.from?.[0]?.email?.toLowerCase()
-          break
+      // Si pas de match dans les headers, chercher dans le body (forwards)
+      if (!clientId && message.snippet) {
+        const parsed = parseForwardedEmail(message.snippet)
+
+        if (parsed.isForwarded) {
+          // Chercher dans tous les emails extraits du body
+          const bodyMatches = findMatchingClients(parsed.allEmails, clientDomainMap)
+          if (bodyMatches.length > 0) {
+            clientId = bodyMatches[0].clientId
+            // Si on a trouvé l'expéditeur original, l'utiliser
+            if (parsed.originalFrom) {
+              fromEmail = parsed.originalFrom
+            }
+          }
         }
       }
 
-      // Ne synchroniser que les emails liés aux clients connus
-      if (!clientId || !fromEmail) continue
+      // Stocker l'email même s'il n'est pas associé à un client (pour review manuel)
+      // On skip seulement si fromEmail est invalide
+      if (!fromEmail) continue
 
       // Vérifier si l'email existe déjà
       const { data: existing } = await supabase
