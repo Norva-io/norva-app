@@ -12,6 +12,29 @@ export function extractEmailsFromText(text: string): string[] {
 }
 
 /**
+ * Nettoie le HTML et extrait le texte brut
+ */
+function stripHtml(html: string): string {
+  // Remplacer les balises <br> et <div> par des sauts de ligne
+  let text = html.replace(/<br\s*\/?>/gi, '\n')
+  text = text.replace(/<\/div>/gi, '\n')
+  text = text.replace(/<\/p>/gi, '\n')
+
+  // Retirer toutes les autres balises HTML
+  text = text.replace(/<[^>]*>/g, '')
+
+  // Décoder les entités HTML courantes
+  text = text.replace(/&nbsp;/g, ' ')
+  text = text.replace(/&lt;/g, '<')
+  text = text.replace(/&gt;/g, '>')
+  text = text.replace(/&amp;/g, '&')
+  text = text.replace(/&quot;/g, '"')
+  text = text.replace(/&#39;/g, "'")
+
+  return text
+}
+
+/**
  * Détecte si un email est un forward et extrait l'expéditeur original
  *
  * Patterns recherchés :
@@ -25,7 +48,9 @@ export function parseForwardedEmail(body: string): {
   originalFrom?: string
   allEmails: string[]
 } {
-  const lowerBody = body.toLowerCase()
+  // Nettoyer le HTML si présent
+  const cleanBody = stripHtml(body)
+  const lowerBody = cleanBody.toLowerCase()
 
   // Détecter si c'est un forward
   const forwardPatterns = [
@@ -39,21 +64,21 @@ export function parseForwardedEmail(body: string): {
 
   const isForwarded = forwardPatterns.some((pattern) => lowerBody.includes(pattern))
 
-  // Extraire tous les emails du corps
-  const allEmails = extractEmailsFromText(body)
+  // Extraire tous les emails du corps nettoyé
+  const allEmails = extractEmailsFromText(cleanBody)
 
   if (!isForwarded) {
     return { isForwarded: false, allEmails }
   }
 
-  // Chercher le "From:" ou "De:" dans la partie forwardée
+  // Chercher le "From:" ou "De:" dans la partie forwardée (sur le texte nettoyé)
   const fromPatterns = [
     /from:\s*<?([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})>?/i,
     /de\s*:\s*<?([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})>?/i,
   ]
 
   for (const pattern of fromPatterns) {
-    const match = body.match(pattern)
+    const match = cleanBody.match(pattern)
     if (match && match[1]) {
       return {
         isForwarded: true,

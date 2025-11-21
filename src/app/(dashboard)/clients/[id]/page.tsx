@@ -6,7 +6,7 @@ import { createClient } from '@supabase/supabase-js'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { NavBar } from '@/components/layout/nav-bar'
-import { ClientActions } from '@/components/client/client-actions'
+import { ClientHeaderActions } from '@/components/client/client-header-actions'
 import { ClientHealthOverview } from '@/components/client/client-health-overview'
 import { EmailTimeline } from '@/components/client/email-timeline'
 import { ResyncButton } from '@/components/client/email-timeline-with-resync'
@@ -85,14 +85,17 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
           </Button>
 
           {/* En-tête client */}
-          <div className="mb-6">
-            <h1 className="font-serif text-4xl font-bold">{client.name}</h1>
-            <p className="mt-2 text-muted-foreground">{client.domain}</p>
-            {client.primary_contact_email && (
-              <p className="mt-1 text-sm text-muted-foreground">
-                Contact: {client.primary_contact_email}
-              </p>
-            )}
+          <div className="mb-6 flex items-start justify-between">
+            <div>
+              <h1 className="font-serif text-4xl font-bold">{client.name}</h1>
+              <p className="mt-2 text-muted-foreground">{client.domain}</p>
+              {client.primary_contact_email && (
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Contact: {client.primary_contact_email}
+                </p>
+              )}
+            </div>
+            <ClientHeaderActions clientId={client.id} clientName={client.name} />
           </div>
         </div>
 
@@ -196,16 +199,6 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
               emailsAnalyzedCount={client.emails_analyzed_count || 0}
               lastAnalyzedAt={client.last_analyzed_at}
             />
-
-            {/* Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Actions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ClientActions clientId={client.id} clientName={client.name} />
-              </CardContent>
-            </Card>
           </div>
         </div>
       </main>
