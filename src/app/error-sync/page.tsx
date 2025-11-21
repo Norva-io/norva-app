@@ -1,5 +1,5 @@
-import { AlertCircle } from 'lucide-react'
-import Link from 'next/link'
+import { AlertCircle, LogOut } from 'lucide-react'
+import { SignOutButton } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -21,41 +21,25 @@ export default function ErrorSyncPage() {
         <CardContent className="space-y-4">
           <div className="rounded-lg border border-border bg-muted/50 p-4">
             <p className="text-sm text-muted-foreground">
-              Il semble y avoir eu un problème lors de la création de votre compte.
-              Cela peut être dû à un problème temporaire de connexion.
+              Il semble y avoir eu un problème lors de la création de votre compte dans notre système.
+              Cela peut être dû à un problème temporaire de connexion avec la base de données.
             </p>
           </div>
 
           <div className="space-y-2">
-            <h3 className="font-semibold">Que faire?</h3>
-            <ul className="space-y-1 text-sm text-muted-foreground">
-              <li className="flex items-start gap-2">
-                <span className="mt-0.5">1.</span>
-                <span>Déconnectez-vous et reconnectez-vous</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="mt-0.5">2.</span>
-                <span>Attendez quelques secondes et réessayez</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="mt-0.5">3.</span>
-                <span>Si le problème persiste, contactez le support</span>
-              </li>
-            </ul>
+            <h3 className="font-semibold">Solution recommandée</h3>
+            <p className="text-sm text-muted-foreground">
+              Déconnectez-vous et reconnectez-vous pour réinitialiser votre session.
+              Votre compte sera automatiquement créé lors de la prochaine connexion.
+            </p>
           </div>
 
-          <div className="flex gap-2">
-            <Button asChild variant="outline" className="flex-1">
-              <Link href="/login">
-                Se reconnecter
-              </Link>
+          <SignOutButton redirectUrl="/login">
+            <Button className="w-full">
+              <LogOut className="mr-2 h-4 w-4" />
+              Se déconnecter
             </Button>
-            <Button asChild className="flex-1">
-              <Link href="/">
-                Retour à l&apos;accueil
-              </Link>
-            </Button>
-          </div>
+          </SignOutButton>
         </CardContent>
       </Card>
     </div>
