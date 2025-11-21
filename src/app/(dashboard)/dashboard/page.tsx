@@ -10,6 +10,7 @@ import { UrgentClientsCard } from '@/components/dashboard/urgent-clients-card'
 import { SuggestedActionsCard } from '@/components/dashboard/suggested-actions-card'
 import { calculatePortfolioHealth } from '@/lib/health-score'
 import { DashboardEmptyState } from '@/components/ui/empty-states'
+import { ArrowRight } from 'lucide-react'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -185,11 +186,14 @@ export default async function DashboardPage() {
           <div className="grid gap-4 grid-cols-2">
             {/* Stat 1: Clients actifs */}
             <Link href="/clients">
-              <Card className="transition-shadow hover:shadow-md">
+              <Card className="transition-all hover:shadow-lg hover:scale-[1.02] cursor-pointer">
                 <CardHeader className="pb-2">
-                  <CardDescription className="text-sm font-medium uppercase tracking-wide">
-                    Clients actifs
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <CardDescription className="text-sm font-medium uppercase tracking-wide">
+                      Clients actifs
+                    </CardDescription>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground/50" />
+                  </div>
                   <CardTitle className="font-serif text-2xl">{clientsCount}</CardTitle>
                 </CardHeader>
                 <CardContent>
