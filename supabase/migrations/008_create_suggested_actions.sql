@@ -1,8 +1,13 @@
--- Migration: Create suggested_actions table
+-- Migration: Create suggested_actions table (v2 - with cleanup)
 -- This will store AI-generated action suggestions for clients
 
+-- Drop existing table and policies if they exist (cleanup)
+DROP TRIGGER IF EXISTS trigger_update_suggested_actions_updated_at ON suggested_actions;
+DROP FUNCTION IF EXISTS update_suggested_actions_updated_at();
+DROP TABLE IF EXISTS suggested_actions CASCADE;
+
 -- Create suggested_actions table
-CREATE TABLE IF NOT EXISTS suggested_actions (
+CREATE TABLE suggested_actions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   client_id UUID NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
@@ -16,9 +21,9 @@ CREATE TABLE IF NOT EXISTS suggested_actions (
 );
 
 -- Add indexes for performance
-CREATE INDEX IF NOT EXISTS idx_suggested_actions_client_id ON suggested_actions(client_id);
-CREATE INDEX IF NOT EXISTS idx_suggested_actions_completed ON suggested_actions(completed);
-CREATE INDEX IF NOT EXISTS idx_suggested_actions_priority ON suggested_actions(priority);
+CREATE INDEX idx_suggested_actions_client_id ON suggested_actions(client_id);
+CREATE INDEX idx_suggested_actions_completed ON suggested_actions(completed);
+CREATE INDEX idx_suggested_actions_priority ON suggested_actions(priority);
 
 -- Add RLS policies
 ALTER TABLE suggested_actions ENABLE ROW LEVEL SECURITY;
@@ -72,7 +77,7 @@ CREATE POLICY "Users can delete their client actions"
   );
 
 -- Add trigger to update updated_at
-CREATE OR REPLACE FUNCTION update_suggested_actions_updated_at()
+CREATE FUNCTION update_suggested_actions_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
   NEW.updated_at = now();
