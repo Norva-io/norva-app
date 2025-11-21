@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button'
 import { NavBar } from '@/components/layout/nav-bar'
 import { ClientActions } from '@/components/client/client-actions'
 import { ClientHealthOverview } from '@/components/client/client-health-overview'
-import { EmailTimelineWithResync } from '@/components/client/email-timeline-with-resync'
+import { EmailTimeline } from '@/components/client/email-timeline'
+import { ResyncButton } from '@/components/client/email-timeline-with-resync'
 import { ClientInsightsList } from '@/components/client/client-insights-list'
 import { ArrowLeft, Mail, AlertCircle, Sparkles } from 'lucide-react'
 import { getOrCreateSupabaseUser } from '@/lib/supabase-user'
@@ -166,16 +167,21 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
             {/* Emails récents */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Mail className="h-5 w-5" />
-                  Timeline des emails
-                </CardTitle>
-                <CardDescription>
-                  Les 20 derniers échanges avec ce client
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Mail className="h-5 w-5" />
+                      Timeline des emails
+                    </CardTitle>
+                    <CardDescription>
+                      Les 20 derniers échanges avec ce client
+                    </CardDescription>
+                  </div>
+                  <ResyncButton />
+                </div>
               </CardHeader>
               <CardContent>
-                <EmailTimelineWithResync emails={emails || []} clientDomain={client.domain} clientName={client.name} />
+                <EmailTimeline emails={emails || []} clientDomain={client.domain} clientName={client.name} />
               </CardContent>
             </Card>
           </div>

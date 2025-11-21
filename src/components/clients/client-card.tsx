@@ -26,6 +26,7 @@ interface ClientCardProps {
     health_score: number | null
     risk_level: 'urgent' | 'high' | 'normal' | null
     emails_analyzed_count: number | null
+    total_emails_count: number | null
     last_interaction_at: string | null
   }
   onDelete: (clientId: string) => Promise<void>
