@@ -110,9 +110,9 @@ export function SyncEmailsSection({ hasEmailConnected, clientsCount }: SyncEmail
               <Mail className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h3 className="font-medium">Synchroniser maintenant</h3>
+              <h3 className="font-medium">Synchroniser tous les clients</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Récupère les emails des 3 derniers jours pour {clientsCount} client{clientsCount > 1 ? 's' : ''}
+                Récupère les emails des 3 derniers jours pour tous vos clients ({clientsCount} client{clientsCount > 1 ? 's' : ''})
               </p>
               <p className="mt-2 text-xs text-muted-foreground">
                 Limite : 100 emails maximum par synchronisation

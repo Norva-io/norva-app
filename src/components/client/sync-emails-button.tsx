@@ -38,7 +38,7 @@ export function SyncEmailsButton() {
   return (
     <Button onClick={handleSync} disabled={isLoading} variant="outline" size="sm">
       <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-      {isLoading ? 'Synchronisation...' : 'Synchroniser les emails'}
+      {isLoading ? 'Synchronisation...' : 'Synchroniser tous les clients'}
     </Button>
   )
 }
