@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { NavBar } from '@/components/layout/nav-bar'
-import { Button } from '@/components/ui/button'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,7 +20,7 @@ export default async function DashboardPage() {
   // Vérifier que l'utilisateur existe dans Supabase
   const { data: user } = await supabase
     .from('users')
-    .select('id, email, first_name, last_name, avatar_url, email_grant_id, email_connected_at')
+    .select('id, email, first_name, last_name, avatar_url')
     .eq('clerk_id', userId)
     .single()
 
@@ -125,17 +124,9 @@ export default async function DashboardPage() {
               <CardTitle className="mt-2 font-serif text-3xl">0</CardTitle>
             </CardHeader>
             <CardContent>
-              {user.email_grant_id ? (
-                <p className="text-xs text-muted-foreground">
-                  Email connecté • {new Date(user.email_connected_at!).toLocaleDateString('fr-FR')}
-                </p>
-              ) : (
-                <Link href="/api/auth/outlook">
-                  <Button size="sm" className="mt-1">
-                    Connecter Outlook
-                  </Button>
-                </Link>
-              )}
+              <p className="text-xs text-muted-foreground">
+                Aucun email analysé pour le moment
+              </p>
             </CardContent>
           </Card>
 
