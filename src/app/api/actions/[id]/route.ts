@@ -43,14 +43,9 @@ export async function PATCH(
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 })
     }
 
-    // Update action status (verify ownership via client_id)
-    const { data: action, error: updateError } = await supabase
+    // First, verify ownership BEFORE updating
+    const { data: existingAction, error: fetchError } = await supabase
       .from('suggested_actions')
-      .update({
-        status,
-        completed_at: status === 'done' ? new Date().toISOString() : null,
-      })
-      .eq('id', id)
       .select(`
         id,
         client_id,
@@ -58,17 +53,31 @@ export async function PATCH(
           user_id
         )
       `)
+      .eq('id', id)
       .single()
+
+    if (fetchError || !existingAction) {
+      return NextResponse.json({ error: 'Action not found' }, { status: 404 })
+    }
+
+    // Verify ownership
+    const actionWithClient = existingAction as unknown as { clients: { user_id: string } }
+    if (actionWithClient.clients.user_id !== user.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    }
+
+    // Now safe to update
+    const { error: updateError } = await supabase
+      .from('suggested_actions')
+      .update({
+        status,
+        completed_at: status === 'done' ? new Date().toISOString() : null,
+      })
+      .eq('id', id)
 
     if (updateError) {
       console.error('Error updating action:', updateError)
       return NextResponse.json({ error: 'Failed to update action' }, { status: 500 })
-    }
-
-    // Verify ownership
-    const actionWithClient = action as unknown as { clients: { user_id: string } }
-    if (!action || actionWithClient.clients.user_id !== user.id) {
-      return NextResponse.json({ error: 'Action not found or unauthorized' }, { status: 404 })
     }
 
     return NextResponse.json({ success: true })
