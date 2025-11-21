@@ -83,6 +83,20 @@ export async function POST(request: NextRequest) {
 
     // Traiter chaque email
     for (const message of messages.data) {
+      // Récupérer le body complet de l'email pour une meilleure détection et l'analyse IA future
+      let fullBody = ''
+      try {
+        const messageDetails = await nylas.messages.find({
+          identifier: user.email_grant_id,
+          messageId: message.id,
+        })
+        // Privilégier body[0] (généralement text/plain ou text/html)
+        fullBody = messageDetails.data.body || message.snippet || ''
+      } catch (error) {
+        console.error(`[Sync] Failed to fetch body for email ${message.id}:`, error)
+        fullBody = message.snippet || ''
+      }
+
       // Extraire tous les emails impliqués (from, to, cc, bcc)
       const allEmails: string[] = []
 
@@ -111,9 +125,9 @@ export async function POST(request: NextRequest) {
       let clientId: string | undefined = headerMatches[0]?.clientId
       let fromEmail = message.from?.[0]?.email?.toLowerCase()
 
-      // Si pas de match dans les headers, chercher dans le body (forwards)
-      if (!clientId && message.snippet) {
-        const parsed = parseForwardedEmail(message.snippet)
+      // Si pas de match dans les headers, chercher dans le body complet (forwards)
+      if (!clientId && fullBody) {
+        const parsed = parseForwardedEmail(fullBody)
 
         // Log pour debug des forwards
         if (parsed.isForwarded) {
@@ -165,7 +179,7 @@ export async function POST(request: NextRequest) {
         console.log(`[Sync] Email ${message.subject} from ${fromEmail} - MATCHED client ${clientId}`)
       }
 
-      // Insérer l'email
+      // Insérer l'email avec le body complet
       const { error: insertError } = await supabase.from('emails').insert({
         client_id: clientId,
         external_id: message.id,
@@ -175,6 +189,7 @@ export async function POST(request: NextRequest) {
         sent_at: new Date((message.date || 0) * 1000).toISOString(),
         received_at: new Date((message.date || 0) * 1000).toISOString(),
         preview: message.snippet || null,
+        body: fullBody || null,
         thread_id: message.threadId || null,
       })
 

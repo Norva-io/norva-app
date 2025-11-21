@@ -80,12 +80,12 @@ export function ClientActions({ clientId, clientName }: ClientActionsProps) {
         {isReassigning ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Synchronisation...
+            Analyse en cours...
           </>
         ) : (
           <>
             <RefreshCw className="mr-2 h-4 w-4" />
-            Synchroniser les emails
+            Analyser les emails
           </>
         )}
       </Button>
