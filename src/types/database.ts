@@ -20,7 +20,7 @@ export interface Database {
           clerk_id: string
           email: string
           full_name: string | null
-          nylas_grant_id: string | null
+          email_grant_id: string | null
           email_provider: 'outlook' | 'gmail' | null
           email_connected_at: string | null
           stripe_customer_id: string | null

@@ -19,7 +19,7 @@ CREATE TABLE users (
   full_name TEXT,
 
   -- OAuth & Email Integration
-  nylas_grant_id TEXT, -- Nylas grant ID for email access
+  email_grant_id TEXT, -- Nylas grant ID for email access
   email_provider TEXT CHECK (email_provider IN ('outlook', 'gmail')), -- 'outlook' only for MVP
   email_connected_at TIMESTAMPTZ,
 
