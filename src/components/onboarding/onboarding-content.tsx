@@ -40,12 +40,11 @@ export function OnboardingContent() {
               className="w-full"
               size="lg"
               onClick={() => {
-                // TODO: Trigger Nylas OAuth flow
-                window.location.href = '/api/auth/outlook'
+                window.location.href = '/api/auth/gmail'
               }}
             >
               <Mail className="mr-2 h-5 w-5" />
-              Connecter Outlook / Office 365
+              Connecter Gmail
             </Button>
 
             <Button
@@ -55,7 +54,18 @@ export function OnboardingContent() {
               disabled
             >
               <Mail className="mr-2 h-5 w-5" />
-              Connecter Gmail (bientôt disponible)
+              Connecter Outlook / Office 365 (bientôt disponible)
+            </Button>
+
+            <Button
+              variant="ghost"
+              className="w-full"
+              size="lg"
+              onClick={() => {
+                window.location.href = '/dashboard'
+              }}
+            >
+              Passer pour le moment
             </Button>
           </div>
 

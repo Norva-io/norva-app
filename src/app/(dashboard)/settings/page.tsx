@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { NavBar } from '@/components/layout/nav-bar'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { EmailProviderCard } from '@/components/settings/email-provider-card'
+import { SyncEmailsSection } from '@/components/settings/sync-emails-section'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -27,6 +28,12 @@ export default async function SettingsPage() {
   if (!user) {
     redirect('/error-sync')
   }
+
+  // Récupérer le nombre de clients
+  const { count: clientsCount } = await supabase
+    .from('clients')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
 
   return (
     <div className="min-h-screen bg-background">
@@ -73,6 +80,12 @@ export default async function SettingsPage() {
               />
             </CardContent>
           </Card>
+
+          {/* Section: Synchronisation */}
+          <SyncEmailsSection
+            hasEmailConnected={!!user.email_grant_id}
+            clientsCount={clientsCount || 0}
+          />
 
           {/* Section: Compte (placeholder pour futures fonctionnalités) */}
           <Card>
