@@ -134,7 +134,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                   <Button asChild>
                     <Link href="/settings">
                       <Sparkles className="mr-2 h-4 w-4" />
-                      Synchroniser
+                      Analyser
                     </Link>
                   </Button>
                 </CardContent>

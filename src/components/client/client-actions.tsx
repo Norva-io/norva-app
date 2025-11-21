@@ -72,6 +72,14 @@ export function ClientActions({ clientId, clientName }: ClientActionsProps) {
   return (
     <div className="space-y-2">
       <Button
+        onClick={handleEdit}
+        variant="outline"
+        className="w-full justify-start"
+      >
+        <Pencil className="mr-2 h-4 w-4" />
+        Modifier les informations
+      </Button>
+      <Button
         onClick={handleReassign}
         variant="outline"
         className="w-full justify-start"
@@ -88,14 +96,6 @@ export function ClientActions({ clientId, clientName }: ClientActionsProps) {
             Analyser les emails
           </>
         )}
-      </Button>
-      <Button
-        onClick={handleEdit}
-        variant="outline"
-        className="w-full justify-start"
-      >
-        <Pencil className="mr-2 h-4 w-4" />
-        Modifier les informations
       </Button>
       <Button
         onClick={handleDelete}

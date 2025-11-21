@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { HealthBadge } from '@/components/ui/health-badge'
 import { getHealthColor } from '@/lib/design-tokens'
-import { MoreVertical, Trash2, Pencil, Mail, Calendar } from 'lucide-react'
+import { MoreVertical, Trash2, Pencil, Mail, Calendar, RefreshCw } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { fr } from 'date-fns/locale'
 
@@ -34,7 +34,8 @@ interface ClientCardProps {
 export function ClientCard({ client, onDelete }: ClientCardProps) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
-  
+  const [isReassigning, setIsReassigning] = useState(false)
+
   // Déterminer la couleur de bordure basée sur le health score
   const healthColor = getHealthColor(client.health_score)
   const borderColorClass = healthColor.border.replace('border-', 'border-l-')
@@ -43,6 +44,32 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
     e.preventDefault()
     e.stopPropagation()
     router.push('/clients/' + client.id + '/edit')
+  }
+
+  const handleReassign = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsReassigning(true)
+
+    try {
+      const response = await fetch('/api/emails/reassign', {
+        method: 'POST',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to reassign emails')
+      }
+
+      alert(`${data.emailsReassigned} email(s) réattribué(s) avec succès`)
+      router.refresh()
+    } catch (error) {
+      console.error('Error reassigning emails:', error)
+      alert('Erreur lors de la réattribution des emails')
+    } finally {
+      setIsReassigning(false)
+    }
   }
 
   const handleDelete = async (e: React.MouseEvent) => {
@@ -103,6 +130,10 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
                   <Pencil className="mr-2 h-4 w-4" />
                   Modifier
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleReassign} disabled={isReassigning}>
+                  <RefreshCw className={`mr-2 h-4 w-4 ${isReassigning ? 'animate-spin' : ''}`} />
+                  Analyser
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-destructive focus:text-destructive"
                   onClick={handleDelete}
@@ -135,7 +166,7 @@ export function ClientCard({ client, onDelete }: ClientCardProps) {
           <div className="flex items-center gap-4 text-xs text-muted-foreground border-t pt-3">
             <div className="flex items-center gap-1">
               <Mail className="h-3 w-3" />
-              <span>{client.emails_analyzed_count || 0} emails</span>
+              <span>{client.total_emails_count || 0} emails</span>
             </div>
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
