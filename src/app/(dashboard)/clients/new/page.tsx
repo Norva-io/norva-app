@@ -92,7 +92,7 @@ export default async function NewClientPage() {
           </Button>
           <h2 className="font-serif text-3xl font-bold">Ajouter un client</h2>
           <p className="mt-1 text-muted-foreground">
-            Créez un client test pour commencer l'analyse
+            Créez un client test pour commencer l&apos;analyse
           </p>
         </div>
 

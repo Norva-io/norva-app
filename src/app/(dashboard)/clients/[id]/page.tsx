@@ -108,7 +108,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                     <div>
                       <h3 className="font-semibold">Connectez votre email</h3>
                       <p className="text-sm text-muted-foreground">
-                        Pour analyser ce client, connectez d'abord votre boîte email
+                        Pour analyser ce client, connectez d&apos;abord votre boîte email
                       </p>
                     </div>
                   </div>
@@ -155,7 +155,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
                   Insights clés
                 </CardTitle>
                 <CardDescription>
-                  Points d'attention détectés par l'IA
+                  Points d&apos;attention détectés par l&apos;IA
                 </CardDescription>
               </CardHeader>
               <CardContent>

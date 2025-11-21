@@ -7,17 +7,14 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { getHealthColor } from '@/lib/design-tokens'
 import { Info } from 'lucide-react'
 
 interface PortfolioHealthCardProps {
   averageScore: number | null
   trend: 'up' | 'down' | 'stable'
-  change?: number
 }
 
-export function PortfolioHealthCard({ averageScore, trend, change = 0 }: PortfolioHealthCardProps) {
-  const healthColor = getHealthColor(averageScore)
+export function PortfolioHealthCard({ averageScore }: PortfolioHealthCardProps) {
 
   // Emoji basé sur le score
   const getEmoji = () => {
@@ -53,7 +50,7 @@ export function PortfolioHealthCard({ averageScore, trend, change = 0 }: Portfol
                   <strong>Calcul du score de santé :</strong><br />
                   • Sentiment des emails (40%)<br />
                   • Temps de réponse (30%)<br />
-                  • Fréquence d'engagement (20%)<br />
+                  • Fréquence d&apos;engagement (20%)<br />
                   • Questions sans réponse (malus)
                 </p>
               </TooltipContent>

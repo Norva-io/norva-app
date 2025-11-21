@@ -30,7 +30,7 @@ export function ClientInsightsList({ insights, onDismiss }: ClientInsightsListPr
         <AlertCircle className="mx-auto mb-3 h-12 w-12 opacity-20" />
         <p>Aucun insight disponible</p>
         <p className="text-sm">
-          Les insights seront générés automatiquement lors de l'analyse
+          Les insights seront générés automatiquement lors de l&apos;analyse
         </p>
       </div>
     )

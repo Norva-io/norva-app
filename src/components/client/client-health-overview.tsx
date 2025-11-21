@@ -17,10 +17,8 @@ interface ClientHealthOverviewProps {
 
 export function ClientHealthOverview({
   healthScore,
-  riskLevel,
   lastInteractionAt,
   emailsAnalyzedCount,
-  lastAnalyzedAt,
 }: ClientHealthOverviewProps) {
   const healthColor = getHealthColor(healthScore)
 
@@ -32,7 +30,7 @@ export function ClientHealthOverview({
     const interaction = new Date(date)
     const diffDays = Math.floor((now.getTime() - interaction.getTime()) / (1000 * 60 * 60 * 24))
 
-    if (diffDays === 0) return 'Aujourd\'hui'
+    if (diffDays === 0) return 'Aujourd&apos;hui'
     if (diffDays === 1) return 'Hier'
     if (diffDays < 7) return 'Il y a ' + diffDays + ' jours'
     if (diffDays < 30) return 'Il y a ' + Math.floor(diffDays / 7) + ' semaines'
@@ -47,9 +45,9 @@ export function ClientHealthOverview({
     'border-l-yellow-500'
 
   return (
-    <Card className={'border-l-4 ' + borderLeftClass}>
+    <Card className={`border-l-4 ${borderLeftClass}`}>
       <CardHeader>
-        <CardTitle>Vue d'ensemble santé</CardTitle>
+        <CardTitle>Vue d&apos;ensemble santé</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Health Score Display */}

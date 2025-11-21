@@ -81,7 +81,8 @@ export default async function DashboardPage() {
   const atRiskClients = clients?.filter(c => c.risk_level === 'urgent' || c.risk_level === 'high') || []
 
   // Récupérer les emails récents (dernières 48h)
-  const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
+  const now = new Date()
+  const twoDaysAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000).toISOString()
   const { count: recentEmailsCount } = await supabase
     .from('emails')
     .select('*', { count: 'exact', head: true })
@@ -124,15 +125,18 @@ export default async function DashboardPage() {
     .eq('status', 'pending')
 
   // Formater les actions pour le composant
-  const formattedActions = suggestedActions?.map(action => ({
-    id: action.id,
-    client_id: action.client_id,
-    client_name: (action.clients as any).name,
-    title: action.title,
-    description: action.description || undefined,
-    priority: action.priority as 'urgent' | 'high' | 'normal',
-    status: action.status as 'pending' | 'done' | 'snoozed',
-  })) || []
+  const formattedActions = suggestedActions?.map(action => {
+    const client = action.clients as unknown as { name: string }
+    return {
+      id: action.id,
+      client_id: action.client_id,
+      client_name: client.name,
+      title: action.title,
+      description: action.description || undefined,
+      priority: action.priority as 'urgent' | 'high' | 'normal',
+      status: action.status as 'pending' | 'done' | 'snoozed',
+    }
+  }) || []
 
   // Formater les clients à risque
   const formattedUrgentClients = atRiskClients.map(client => ({

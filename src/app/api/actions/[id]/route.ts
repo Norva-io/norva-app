@@ -66,7 +66,8 @@ export async function PATCH(
     }
 
     // Verify ownership
-    if (!action || (action as any).clients.user_id !== user.id) {
+    const actionWithClient = action as unknown as { clients: { user_id: string } }
+    if (!action || actionWithClient.clients.user_id !== user.id) {
       return NextResponse.json({ error: 'Action not found or unauthorized' }, { status: 404 })
     }
 

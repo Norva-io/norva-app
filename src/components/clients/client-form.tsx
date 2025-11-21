@@ -68,7 +68,7 @@ export function ClientForm({ action, initialData, submitLabel = 'Créer le clien
           onChange={(e) => setCompanyName(e.target.value)}
         />
         <p className="text-xs text-muted-foreground">
-          Le nom de l'entreprise ou de l'organisation
+          Le nom de l&apos;entreprise ou de l&apos;organisation
         </p>
       </div>
 
@@ -108,7 +108,7 @@ export function ClientForm({ action, initialData, submitLabel = 'Créer le clien
           onFocus={handleEmailFocus}
         />
         <p className="text-xs text-muted-foreground">
-          Optionnel : L'email principal de votre contact
+          Optionnel : L&apos;email principal de votre contact
         </p>
       </div>
 

@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { RiskIndicator } from '@/components/ui/risk-indicator'
 import { HealthBadge } from '@/components/ui/health-badge'
-import { AlertCircle, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 interface UrgentClient {
   id: string
