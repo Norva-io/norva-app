@@ -62,12 +62,12 @@ export async function POST(request: NextRequest) {
 
     // Récupérer les emails depuis Nylas
     console.log(`[Sync] Fetching emails for grant_id: ${user.email_grant_id}`)
-    console.log(`[Sync] Filters: limit=100, receivedAfter=${new Date(threeDaysAgo * 1000).toISOString()}`)
+    console.log(`[Sync] Filters: limit=25, receivedAfter=${new Date(threeDaysAgo * 1000).toISOString()}`)
 
     const messages = await nylas.messages.list({
       identifier: user.email_grant_id,
       queryParams: {
-        limit: 100,
+        limit: 25,
         receivedAfter: threeDaysAgo,
       },
     })

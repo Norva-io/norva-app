@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { createClient } from '@supabase/supabase-js'
-import { extractDomain } from '@/lib/email-parser'
+import { extractDomain, parseForwardedEmail, findMatchingClients } from '@/lib/email-parser'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -57,7 +57,7 @@ export async function POST() {
     // Récupérer tous les emails orphelins (client_id = null)
     const { data: orphanEmails, error: orphanError } = await supabase
       .from('emails')
-      .select('id, from_email, to_emails, preview')
+      .select('id, from_email, to_emails, preview, body, subject')
       .is('client_id', null)
 
     if (orphanError) {
@@ -79,7 +79,7 @@ export async function POST() {
     for (const email of orphanEmails) {
       let clientId: string | undefined
 
-      // Extraire tous les emails de l'email
+      // Extraire tous les emails de l'email (headers)
       const allEmails: string[] = []
 
       if (email.from_email) {
@@ -92,15 +92,30 @@ export async function POST() {
         })
       }
 
-      // Chercher un match par domaine
-      for (const emailAddr of allEmails) {
-        const domain = extractDomain(emailAddr)
-        if (domain) {
-          const matchedClientId = clientDomainMap.get(domain)
-          if (matchedClientId) {
-            clientId = matchedClientId
-            console.log(`[Reassign] Email ${email.id} MATCHED client ${clientId} via ${emailAddr}`)
-            break
+      // Chercher un match par domaine dans les headers
+      const headerMatches = findMatchingClients(allEmails, clientDomainMap)
+      clientId = headerMatches[0]?.clientId
+
+      // Si pas de match dans les headers ET qu'on a un body, parser pour détecter les forwards
+      if (!clientId && email.body) {
+        const parsed = parseForwardedEmail(email.body)
+
+        if (parsed.isForwarded) {
+          console.log(`[Reassign] Email ${email.id} "${email.subject}" - Forward detected`)
+          console.log(`[Reassign]   - Original from: ${parsed.originalFrom || 'not found'}`)
+          console.log(`[Reassign]   - All emails in body: ${parsed.allEmails.join(', ')}`)
+
+          // Exclure le from_email pour éviter de matcher le forwarder
+          const emailsToMatch = parsed.allEmails.filter(e => e !== email.from_email?.toLowerCase())
+          console.log(`[Reassign]   - Emails après exclusion du forwarder: ${emailsToMatch.join(', ')}`)
+
+          // Chercher un match dans les emails filtrés
+          const bodyMatches = findMatchingClients(emailsToMatch, clientDomainMap)
+          if (bodyMatches.length > 0) {
+            clientId = bodyMatches[0].clientId
+            console.log(`[Reassign]   - MATCHED via forward body: client ${clientId} via ${bodyMatches[0].matchedEmail}`)
+          } else {
+            console.log(`[Reassign]   - No client match in forwarded emails`)
           }
         }
       }
@@ -114,9 +129,12 @@ export async function POST() {
 
         if (!updateError) {
           emailsReassigned++
+          console.log(`[Reassign] Email ${email.id} successfully assigned to client ${clientId}`)
         } else {
           console.error(`[Reassign] Failed to update email ${email.id}:`, updateError)
         }
+      } else {
+        console.log(`[Reassign] Email ${email.id} "${email.subject}" - No match found (headers or body)`)
       }
     }
 
